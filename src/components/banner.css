@@ -1,0 +1,24 @@
+/* Swiper 컨테이너에 대한 스타일 */
+.mySwiper {
+  width: 100%;
+  height: 350px; /* 원하는 높이로 조정하세요 */
+}
+
+/* Swiper 슬라이드에 대한 스타일 */
+.swiper-slide {
+  text-align: center;
+  font-size: 18px;
+  background: #fff;
+
+  /* Center slide text vertically */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Swiper 슬라이드 이미지에 대한 스타일 */
+.swiper-slide img {
+  max-width: 80%;
+  max-height: auto;
+  object-fit: contain; /* 이미지 비율을 유지하면서 크게 표시됩니다. */
+}
