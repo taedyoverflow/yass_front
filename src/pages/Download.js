@@ -91,12 +91,20 @@ export default function Download() {
     setVocalBlobUrl('');
     setAccompBlobUrl('');
   
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 120000); // 120초 = 2분 동안 기다림
+  
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: youtubeUrl }),
+        signal: controller.signal,
       });
+  
+      clearTimeout(timeoutId); // 성공 시 타임아웃 제거
   
       if (!response.ok) {
         throw new Error("분리 실패. 다시 시도해 주세요.");
@@ -104,15 +112,10 @@ export default function Download() {
   
       const { vocal_stream_url, accompaniment_stream_url } = await response.json();
   
-      console.log("🔗 받은 URL:", vocal_stream_url, accompaniment_stream_url);
-  
       const [vocalRes, accompRes] = await Promise.all([
         fetch(`${process.env.REACT_APP_BACKEND_URL}${vocal_stream_url}`),
         fetch(`${process.env.REACT_APP_BACKEND_URL}${accompaniment_stream_url}`),
       ]);
-  
-      console.log("📥 vocal response:", vocalRes);
-      console.log("📥 accompaniment response:", accompRes);
   
       if (!vocalRes.ok || !accompRes.ok) {
         throw new Error("오디오 스트림 응답 오류");
@@ -121,9 +124,6 @@ export default function Download() {
       const vocalBlob = await vocalRes.blob();
       const accompBlob = await accompRes.blob();
   
-      console.log("✅ vocalBlob size:", vocalBlob.size);
-      console.log("✅ accompBlob size:", accompBlob.size);
-  
       if (vocalBlob.size === 0 || accompBlob.size === 0) {
         throw new Error("오디오 파일이 비어 있습니다.");
       }
@@ -131,18 +131,20 @@ export default function Download() {
       const vocalUrl = URL.createObjectURL(vocalBlob);
       const accompUrl = URL.createObjectURL(accompBlob);
   
-      console.log("✅ vocal blob url:", vocalUrl);
-      console.log("✅ accomp blob url:", accompUrl);
-  
       setVocalBlobUrl(vocalUrl);
       setAccompBlobUrl(accompUrl);
     } catch (error) {
-      alert("오류 발생: " + error.message);
+      if (error.name === 'AbortError') {
+        alert("요청 시간이 초과되었습니다. 다시 시도해주세요.");
+      } else {
+        alert("오류 발생: " + error.message);
+      }
       console.error("❌ 오류:", error);
     } finally {
       setSeparationLoading(false);
     }
   };
+  
   
   
 
