@@ -186,7 +186,7 @@ export default function Download() {
               sx={{ m: 1 }}
               disabled={searchLoading}
             >
-              {searchLoading ? "Searching..." : "Search"}
+              <span>{searchLoading ? "Searching..." : "Search"}</span>
             </Button>
           </Box>
 
