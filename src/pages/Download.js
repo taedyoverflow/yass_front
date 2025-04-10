@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
 import Container from "@mui/material/Container";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -17,7 +18,7 @@ function Copyright() {
     <Typography variant="body2" color="text.secondary" align="center">
       {"Copyright © "}
       <Link color="inherit" href="/">
-        YASS
+        YASS AI
       </Link>{" "}
       {new Date().getFullYear()}
       {"."}
@@ -41,6 +42,9 @@ export default function Download() {
   const [accompBlobUrl, setAccompBlobUrl] = useState('');
   const [page, setPage] = useState(1);
   const [totalVideos, setTotalVideos] = useState([]);
+  useEffect(() => {
+    console.log("✅ 백엔드 URL:", process.env.REACT_APP_BACKEND_URL);
+  }, []);
 
   const searchVideos = async () => {
     setSearchLoading(true);
