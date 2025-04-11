@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Container from "@mui/material/Container";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -42,6 +41,8 @@ export default function Download() {
   const [accompBlobUrl, setAccompBlobUrl] = useState('');
   const [page, setPage] = useState(1);
   const [totalVideos, setTotalVideos] = useState([]);
+  const inputRef = useRef(null);
+
   useEffect(() => {
     console.log("✅ 백엔드 URL:", process.env.REACT_APP_BACKEND_URL);
   }, []);
@@ -94,7 +95,7 @@ export default function Download() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
-    }, 240000);
+    }, 240000); // 4분
   
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio/`, {
@@ -106,12 +107,19 @@ export default function Download() {
   
       clearTimeout(timeoutId);
   
+      const contentType = response.headers.get("content-type");
+  
       if (!response.ok) {
-        const errorData = await response.json();
-        if (response.status === 401 && errorData.detail.includes("쿠키가 만료")) {
-          throw new Error("쿠키가 만료되었습니다.");
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await response.json();
+          if (response.status === 401 && errorData.detail.includes("쿠키가 만료")) {
+            throw new Error("쿠키가 만료되었습니다.");
+          }
+          throw new Error(errorData.detail || "처리 실패");
+        } else {
+          const errorText = await response.text();
+          throw new Error("서버 응답이 JSON이 아님: " + errorText);
         }
-        throw new Error(errorData.detail || "처리 실패");
       }
   
       const { vocal_stream_url, accompaniment_stream_url } = await response.json();
@@ -137,8 +145,6 @@ export default function Download() {
     } catch (error) {
       if (error.name === 'AbortError') {
         alert("요청 시간이 초과되었습니다. 다시 시도해주세요.");
-      } else if (error.message.includes("쿠키가 만료")) {
-        alert("⚠️ 인증 쿠키가 만료되었습니다. 관리자에게 문의해주세요.");
       } else {
         alert("오류 발생: " + error.message);
       }
@@ -147,10 +153,6 @@ export default function Download() {
       setSeparationLoading(false);
     }
   };
-  
-  
-  
-  
 
   return (
     <>
@@ -159,16 +161,16 @@ export default function Download() {
       <main>
         <Container sx={{ py: 8 }} maxWidth="md">
           <Typography variant="h4" gutterBottom align="center">
-            YouTube Audio Separation and Streaming
+            YouTube Audio Separation and Streaming AI
           </Typography>
           <Typography variant="body1" align="center" sx={{ mt: 2, mb: 4 }}>
-            Search YouTube,<br />
-            separate vocals and accompaniment <br />
-            using AI (powered by Spleeter),<br /> 
-            then stream or download them below. <br /><br />
-            Click a thumbnail to watch on YouTube.<br />
-            Click a title to auto-fill the URL input field.
+            유튜브에서 음원을 검색하고,<br />
+            보컬과 반주(MR)를 Spleeter AI로 분리한 뒤<br />
+            바로 스트리밍하거나 다운로드해보세요.<br /><br />
+            ▶ 썸네일을 클릭하면 유튜브에서 영상 재생<br />
+            ▶ 제목을 클릭하면 자동으로 아래 URL 입력칸에 채워집니다.
           </Typography>
+
 
           <Box
             component="form"
@@ -217,7 +219,12 @@ export default function Download() {
                       gutterBottom
                       variant="h6"
                       component="div"
-                      onClick={() => setYoutubeUrl(video.link)}
+                      onClick={() => {
+                        setYoutubeUrl(video.link);
+                        setTimeout(() => {
+                          inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }, 100); // 약간의 delay 주면 안정적
+                      }}
                       style={{ cursor: "pointer", textDecoration: "underline" }}
                     >
                       {video.title}
@@ -254,6 +261,7 @@ export default function Download() {
             }}
           >
             <TextField
+              inputRef={inputRef}
               label="Enter the YouTube URL."
               variant="outlined"
               sx={{ width: "50%" }}
