@@ -94,7 +94,7 @@ export default function Download() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
-    }, 120000); // 120초 = 2분 동안 기다림
+    }, 240000);
   
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio/`, {
@@ -104,10 +104,14 @@ export default function Download() {
         signal: controller.signal,
       });
   
-      clearTimeout(timeoutId); // 성공 시 타임아웃 제거
+      clearTimeout(timeoutId);
   
       if (!response.ok) {
-        throw new Error("분리 실패. 다시 시도해 주세요.");
+        const errorData = await response.json();
+        if (response.status === 401 && errorData.detail.includes("쿠키가 만료")) {
+          throw new Error("쿠키가 만료되었습니다.");
+        }
+        throw new Error(errorData.detail || "처리 실패");
       }
   
       const { vocal_stream_url, accompaniment_stream_url } = await response.json();
@@ -128,14 +132,13 @@ export default function Download() {
         throw new Error("오디오 파일이 비어 있습니다.");
       }
   
-      const vocalUrl = URL.createObjectURL(vocalBlob);
-      const accompUrl = URL.createObjectURL(accompBlob);
-  
-      setVocalBlobUrl(vocalUrl);
-      setAccompBlobUrl(accompUrl);
+      setVocalBlobUrl(URL.createObjectURL(vocalBlob));
+      setAccompBlobUrl(URL.createObjectURL(accompBlob));
     } catch (error) {
       if (error.name === 'AbortError') {
         alert("요청 시간이 초과되었습니다. 다시 시도해주세요.");
+      } else if (error.message.includes("쿠키가 만료")) {
+        alert("⚠️ 인증 쿠키가 만료되었습니다. 관리자에게 문의해주세요.");
       } else {
         alert("오류 발생: " + error.message);
       }
@@ -144,6 +147,7 @@ export default function Download() {
       setSeparationLoading(false);
     }
   };
+  
   
   
   

@@ -1,70 +1,53 @@
-# Getting Started with Create React App
+# 🎧 YASS AI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[https://yass-ai.com](https://yass-ai.com)
 
-## Available Scripts
+YouTube Audio Separation and Streaming AI  
+유튜브 음원 분리(보컬, 반주 파일), 스트리밍 및 다운로드 가능  
+AI 기반 음원 분리(Spleeter), yt-dlp 기반 오디오 다운로드, Blob 스트리밍 기반 웹플레이어
 
-In the project directory, you can run:
+---
 
-### `npm start`
+[![YASS AI 데모 영상](http://img.youtube.com/vi/xch2Lzt14x4/0.jpg)](https://youtu.be/xch2Lzt14x4)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+> 음원 분리, AI Cover(추론) 및 맞춤형 음성 학습 모델 생성, TTS 시연 영상  
+> 아무도 개발 안 시켜줘서 그냥 내가 만듦
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🔍 Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- ✅ **YouTube Search**: 유튜브 영상 검색 및 썸네일 리스트 제공
+- 🎤 **Audio Separation**: 보컬/반주 분리 (powered by Spleeter)
+- 🎧 **Streaming & Download**: 브라우저 내 실시간 재생 및 다운로드
+- 🚀 **FastAPI + React** 기반 실시간 처리 구조
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🌐 URL
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+👉 [yass-ai.com](https://yass-ai.com)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 🛠️ Tech Stack
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **Frontend**: React + MUI
+- **Backend**: FastAPI, yt-dlp, Spleeter
+- **Infra**: Docker, Nginx, Certbot (Let's Encrypt)
+- **Optional 고도화 고려 중**: Redis + Celery + MinIO
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 🧠 만든 이유
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- 직접 필요해서 만듦
+- 아무도 개발 안 시켜줘서 내가 만듦
+- 실전에서 돌아가는 AI 웹 서비스를 만들고 싶었음
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 📬 Contact
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+📧 taedyoverflow@gmail.com  
+🧠 Made by Taedy
