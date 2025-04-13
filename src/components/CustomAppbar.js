@@ -29,7 +29,10 @@ function CustomAppBar() {
       </Typography>
       <List>
         <ListItem button component="a" href="/">
-          <ListItemText primary="Search and Download" />
+          <ListItemText primary="Spleeter" />
+        </ListItem>
+        <ListItem button component="a" href="/tts">
+          <ListItemText primary="edgeTTS" />
         </ListItem>
       </List>
     </Box>
@@ -60,9 +63,9 @@ function CustomAppBar() {
             <Button href="/separation" color="inherit">SEPARATION</Button>
             <Button href="/inference" color="inherit">INFERENCE</Button>
             <Button href="/train" color="inherit">TRAIN</Button>
-            <Button href="/tts" color="inherit">TTS</Button>
             <Button href="/signin" color="inherit">SIGN IN</Button> */}
-            <Button href="/" color="inherit">HOME</Button>
+            <Button href="/" color="inherit">Spleeter</Button>
+            <Button href="/tts" color="inherit">edgeTTS</Button>
           </Box>
         )}
       </Toolbar>

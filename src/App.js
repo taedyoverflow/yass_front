@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // import Separation from "./pages/Separation";
 // import Inference from "./pages/Inference";
 // import Train from "./pages/Train";
-// import TTS from "./pages/TTS";
+import TTS from "./pages/TTS";
 import Download from "./pages/Download"
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -29,7 +29,7 @@ function App() {
           {/* <Route path="/separation" element={<Separation />} /> */}
           {/* <Route path="/inference" element={<Inference />} /> */}
           {/* <Route path="/train" element={<Train />} /> */}
-          {/* <Route path="/tts" element={<TTS />} /> */}
+          <Route path="/tts" element={<TTS />} />
           <Route path="/" element={<Download />} />
         </Routes>
       </Router>

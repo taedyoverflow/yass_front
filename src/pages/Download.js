@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Container from "@mui/material/Container";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -32,20 +32,68 @@ function decodeHtml(html) {
 }
 
 export default function Download() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [videos, setVideos] = useState([]);
-  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
   const [separationLoading, setSeparationLoading] = useState(false);
-  const [vocalBlobUrl, setVocalBlobUrl] = useState('');
-  const [accompBlobUrl, setAccompBlobUrl] = useState('');
+  const [vocalBlobUrl, setVocalBlobUrl] = useState("");
+  const [accompBlobUrl, setAccompBlobUrl] = useState("");
+  const [taskId, setTaskId] = useState(null);
   const [page, setPage] = useState(1);
   const [totalVideos, setTotalVideos] = useState([]);
   const inputRef = useRef(null);
+  const [estimatedTimeLeft, setEstimatedTimeLeft] = useState(null);
+
+  const checkResult = useCallback(async () => {
+    if (!taskId) return;
+    try {
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/result/${taskId}`);
+      const data = await res.json();
+      if (data.vocal_url && data.accompaniment_url) {
+        const [vocalRes, accompRes] = await Promise.all([
+          fetch(data.vocal_url),
+          fetch(data.accompaniment_url),
+        ]);
+  
+        const vocalBlob = await vocalRes.blob();
+        const accompBlob = await accompRes.blob();
+  
+        setVocalBlobUrl(URL.createObjectURL(vocalBlob));
+        setAccompBlobUrl(URL.createObjectURL(accompBlob));
+        setSeparationLoading(false);
+      }
+    } catch (error) {
+      console.error("결과 확인 중 오류 발생: ", error);
+    }
+  }, [taskId]);
+
+  useEffect(() => {
+    let interval;
+    if (separationLoading && taskId) {
+      setEstimatedTimeLeft(90); // 기본 90초 예상
+      interval = setInterval(() => {
+        checkResult();
+        setEstimatedTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [separationLoading, taskId, checkResult]); 
 
   useEffect(() => {
     console.log("✅ 백엔드 URL:", process.env.REACT_APP_BACKEND_URL);
   }, []);
+
+  useEffect(() => {
+    let interval;
+    if (separationLoading && taskId) {
+      interval = setInterval(() => {
+        checkResult();
+      }, 5000);
+    }
+    return () => clearInterval(interval);
+  }, [separationLoading, taskId, checkResult]);
+  
 
   const searchVideos = async () => {
     setSearchLoading(true);
@@ -89,70 +137,29 @@ export default function Download() {
 
   const processAudio = async () => {
     setSeparationLoading(true);
-    setVocalBlobUrl('');
-    setAccompBlobUrl('');
-  
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-    }, 240000); // 4분
-  
+    setVocalBlobUrl("");
+    setAccompBlobUrl("");
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: youtubeUrl }),
-        signal: controller.signal,
       });
-  
-      clearTimeout(timeoutId);
-  
-      const contentType = response.headers.get("content-type");
-  
-      if (!response.ok) {
-        if (contentType && contentType.includes("application/json")) {
-          const errorData = await response.json();
-          if (response.status === 401 && errorData.detail.includes("쿠키가 만료")) {
-            throw new Error("쿠키가 만료되었습니다.");
-          }
-          throw new Error(errorData.detail || "처리 실패");
-        } else {
-          const errorText = await response.text();
-          throw new Error("서버 응답이 JSON이 아님: " + errorText);
-        }
-      }
-  
-      const { vocal_stream_url, accompaniment_stream_url } = await response.json();
-  
-      const [vocalRes, accompRes] = await Promise.all([
-        fetch(`${process.env.REACT_APP_BACKEND_URL}${vocal_stream_url}`),
-        fetch(`${process.env.REACT_APP_BACKEND_URL}${accompaniment_stream_url}`),
-      ]);
-  
-      if (!vocalRes.ok || !accompRes.ok) {
-        throw new Error("오디오 스트림 응답 오류");
-      }
-  
-      const vocalBlob = await vocalRes.blob();
-      const accompBlob = await accompRes.blob();
-  
-      if (vocalBlob.size === 0 || accompBlob.size === 0) {
-        throw new Error("오디오 파일이 비어 있습니다.");
-      }
-  
-      setVocalBlobUrl(URL.createObjectURL(vocalBlob));
-      setAccompBlobUrl(URL.createObjectURL(accompBlob));
+
+      const data = await response.json();
+      setTaskId(data.task_id);
     } catch (error) {
-      if (error.name === 'AbortError') {
-        alert("요청 시간이 초과되었습니다. 다시 시도해주세요.");
-      } else {
-        alert("오류 발생: " + error.message);
-      }
-      console.error("❌ 오류:", error);
-    } finally {
+      alert("분리 요청 중 오류 발생: " + error.message);
+      console.error(error);
       setSeparationLoading(false);
     }
   };
+
+
+  
+
+// 이후 return(...) JSX 코드 블록은 변경 없음 (디자인 유지 조건)
+
 
   return (
     <>
@@ -168,7 +175,7 @@ export default function Download() {
             보컬과 반주(MR)를 Spleeter AI로 분리한 뒤<br />
             바로 스트리밍하거나 다운로드해보세요.<br /><br />
             ▶ 썸네일을 클릭하면 유튜브에서 영상 재생<br />
-            ▶ 제목을 클릭하면 자동으로 아래 URL 입력칸에 채워집니다.
+            ▶ 제목을 클릭하면 자동으로 아래 URL 입력칸이 채워집니다.
           </Typography>
 
 
@@ -272,19 +279,19 @@ export default function Download() {
               variant="contained"
               onClick={processAudio}
               disabled={separationLoading}
-              sx={{ m: 1 }}
+              sx={{ m: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               type="button"
             >
-              {separationLoading ? "Separating..." : "SEPARATION"}
+              {separationLoading ? (
+                <>
+                  <CircularProgress size={20} sx={{ mr: 1 }} />
+                  {`Separating...${estimatedTimeLeft !== null ? ` (${estimatedTimeLeft} s left)` : ''}`}
+                </>
+              ) : (
+                'SEPARATION'
+              )}
             </Button>
           </Box>
-
-          {separationLoading && (
-            <Box display="flex" justifyContent="center" sx={{ mt: 2 }}>
-              <CircularProgress />
-              <Typography sx={{ ml: 2 }}>Separating vocals and accompaniment...</Typography>
-            </Box>
-          )}
 
           {!separationLoading && vocalBlobUrl && (
             <Box sx={{ mt: 4, textAlign: "center" }}>
