@@ -38,7 +38,10 @@ export default function TTS() {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/result/${taskId}`);
       const data = await res.json();
       if (data.url) {
-        setResultAudio(data.url);
+        const audioRes = await fetch(data.url);
+        const audioBlob = await audioRes.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        setResultAudio(audioUrl);
         setPolling(false);
       }
     } catch (err) {
@@ -59,21 +62,37 @@ export default function TTS() {
   }, [polling, checkResult]);
 
   const handleSubmit = async () => {
-    setLoading(true);
     setError('');
     setResultAudio('');
-
+  
+    if (!text.trim() && !selectedVoice) {
+      alert("텍스트를 입력하고 언어와 성별을 정해주세요.");
+      return;
+    }
+  
+    if (!text.trim()) {
+      alert("텍스트를 입력해주세요.");
+      return;
+    }
+  
+    if (!selectedVoice) {
+      alert("언어와 성별을 정해주세요.");
+      return;
+    }
+  
+    setLoading(true);
+  
     const formData = new URLSearchParams();
     formData.append('text', text);
     formData.append('voice', selectedVoice);
-
+  
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/tts/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData
       });
-
+  
       const data = await response.json();
       setTaskId(data.task_id);
       setPolling(true);
@@ -84,6 +103,7 @@ export default function TTS() {
       setLoading(false);
     }
   };
+  
 
   return (
     <>

@@ -136,16 +136,22 @@ export default function Download() {
   };
 
   const processAudio = async () => {
+    if (!youtubeUrl.trim()) {
+      alert("YouTube URL을 입력해주세요.");
+      return;
+    }
+  
     setSeparationLoading(true);
     setVocalBlobUrl("");
     setAccompBlobUrl("");
+  
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: youtubeUrl }),
       });
-
+  
       const data = await response.json();
       setTaskId(data.task_id);
     } catch (error) {
@@ -154,9 +160,6 @@ export default function Download() {
       setSeparationLoading(false);
     }
   };
-
-
-  
 
 // 이후 return(...) JSX 코드 블록은 변경 없음 (디자인 유지 조건)
 
