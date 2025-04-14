@@ -47,12 +47,7 @@ export default function TTS() {
 
         const audioBlob = await audioRes.blob();
         const blobUrl = URL.createObjectURL(audioBlob);
-
-        // 💡 렌더링 안정화를 위한 약간의 지연
-        setTimeout(() => {
-          setResultAudio(blobUrl);
-        }, 100);
-
+        setResultAudio(blobUrl); // ✅ setTimeout 제거
         setPolling(false);
       }
     } catch (err) {
