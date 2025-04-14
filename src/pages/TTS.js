@@ -90,7 +90,7 @@ export default function TTS() {
       <CustomAppBar />
       <main>
         <Container sx={{ py: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }} maxWidth="md">
-          <Typography variant="h4" gutterBottom align="center">Text-to-Speech AI <br />텍스트를 음성으로 변환</Typography>
+          <Typography variant="h4" gutterBottom align="center">Text-to-Speech AI <br/>텍스트를 음성으로 변환</Typography>
 
           <Box sx={{ width: '100%', maxWidth: 400, mt: 2 }}>
             <TextField
@@ -136,6 +136,7 @@ export default function TTS() {
             )}
           </Button>
 
+
           {resultAudio && (
             <Box mt={4} textAlign="center">
               <Typography variant="h6">Generated Audio</Typography>
@@ -160,9 +161,9 @@ export default function TTS() {
       </main>
 
       <Box sx={{ bgcolor: "background.paper", p: 6 }} component="footer">
-        <Typography
+        <Typography 
           variant="body2"
-          align="center"
+          align="center" 
           color="text.secondary"
           sx={{ fontSize: "0.875rem" }}
         >
