@@ -50,6 +50,7 @@ export default function Download() {
     try {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/result/${taskId}`);
       const data = await res.json();
+  
       if (data.vocal_url && data.accompaniment_url) {
         const [vocalRes, accompRes] = await Promise.all([
           fetch(data.vocal_url),
@@ -59,14 +60,19 @@ export default function Download() {
         const vocalBlob = await vocalRes.blob();
         const accompBlob = await accompRes.blob();
   
-        setVocalBlobUrl(URL.createObjectURL(vocalBlob));
-        setAccompBlobUrl(URL.createObjectURL(accompBlob));
+        const vocalBlobUrl = URL.createObjectURL(vocalBlob);
+        const accompBlobUrl = URL.createObjectURL(accompBlob);
+  
+        // ✅ Blob 캐시 URL로 상태 저장
+        setVocalBlobUrl(vocalBlobUrl);
+        setAccompBlobUrl(accompBlobUrl);
         setSeparationLoading(false);
       }
     } catch (error) {
       console.error("결과 확인 중 오류 발생: ", error);
     }
   }, [taskId]);
+  
 
   useEffect(() => {
     let interval;
