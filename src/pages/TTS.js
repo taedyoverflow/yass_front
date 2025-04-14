@@ -34,20 +34,23 @@ export default function TTS() {
 
   const checkResult = useCallback(async () => {
     if (!taskId) return;
+
     try {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/result/${taskId}`);
       const data = await res.json();
+
       if (data.url) {
         const audioRes = await fetch(data.url);
-        const contentType = audioRes.headers.get("Content-Type");
+        if (!audioRes.ok) throw new Error("오디오 파일 접근 실패");
 
+        const contentType = audioRes.headers.get("Content-Type");
         if (!contentType || !contentType.includes("audio")) {
           throw new Error("응답이 오디오 형식이 아닙니다.");
         }
 
         const audioBlob = await audioRes.blob();
         const blobUrl = URL.createObjectURL(audioBlob);
-        setResultAudio(blobUrl); // ✅ setTimeout 제거
+        setResultAudio(blobUrl);
         setPolling(false);
       }
     } catch (err) {
