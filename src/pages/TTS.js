@@ -38,17 +38,26 @@ export default function TTS() {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/result/${taskId}`);
       const data = await res.json();
       if (data.url) {
-        // Blob 처리 후 Object URL로 변환
         const audioRes = await fetch(data.url);
+        const contentType = audioRes.headers.get("Content-Type");
+
+        if (!contentType || !contentType.includes("audio")) {
+          throw new Error("응답이 오디오 형식이 아닙니다.");
+        }
+
         const audioBlob = await audioRes.blob();
         const blobUrl = URL.createObjectURL(audioBlob);
 
-        setResultAudio(blobUrl);
+        // 💡 렌더링 안정화를 위한 약간의 지연
+        setTimeout(() => {
+          setResultAudio(blobUrl);
+        }, 100);
+
         setPolling(false);
       }
     } catch (err) {
+      console.error("❌ TTS 결과 확인 실패:", err);
       setError("TTS 결과 확인 실패");
-      console.error(err);
       setPolling(false);
     }
   }, [taskId]);
@@ -83,7 +92,7 @@ export default function TTS() {
       setTaskId(data.task_id);
       setPolling(true);
     } catch (err) {
-      console.error(err);
+      console.error("❌ TTS 요청 실패:", err);
       setError("TTS 요청 실패");
     } finally {
       setLoading(false);
@@ -95,7 +104,9 @@ export default function TTS() {
       <CustomAppBar />
       <main>
         <Container sx={{ py: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }} maxWidth="md">
-          <Typography variant="h4" gutterBottom align="center">Text-to-Speech AI <br/>텍스트를 음성으로 변환</Typography>
+          <Typography variant="h4" gutterBottom align="center">
+            Text-to-Speech AI <br />텍스트를 음성으로 변환
+          </Typography>
 
           <Box sx={{ width: '100%', maxWidth: 400, mt: 2 }}>
             <TextField
@@ -165,9 +176,9 @@ export default function TTS() {
       </main>
 
       <Box sx={{ bgcolor: "background.paper", p: 6 }} component="footer">
-        <Typography 
+        <Typography
           variant="body2"
-          align="center" 
+          align="center"
           color="text.secondary"
           sx={{ fontSize: "0.875rem" }}
         >
