@@ -38,7 +38,12 @@ export default function TTS() {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/result/${taskId}`);
       const data = await res.json();
       if (data.url) {
-        setResultAudio(data.url);
+        // Blob 처리 후 Object URL로 변환
+        const audioRes = await fetch(data.url);
+        const audioBlob = await audioRes.blob();
+        const blobUrl = URL.createObjectURL(audioBlob);
+
+        setResultAudio(blobUrl);
         setPolling(false);
       }
     } catch (err) {
@@ -136,12 +141,11 @@ export default function TTS() {
             )}
           </Button>
 
-
           {resultAudio && (
             <Box mt={4} textAlign="center">
               <Typography variant="h6">Generated Audio</Typography>
               <Box sx={{ mt: 2 }}>
-                <audio controls src={resultAudio}></audio>
+                <audio key={resultAudio} controls src={resultAudio}></audio>
                 <br />
                 <a href={resultAudio} download="tts_result.wav">
                   <Button variant="outlined" sx={{ mt: 1 }}>
