@@ -45,6 +45,11 @@ export default function Download() {
   const inputRef = useRef(null);
   const [estimatedTimeLeft, setEstimatedTimeLeft] = useState(null);
 
+  const isValidYouTubeUrl = (url) => {
+    const regex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}(&.*)?$/i;
+    return regex.test(url.trim());
+  };
+
   const checkResult = useCallback(async () => {
     if (!taskId) return;
     try {
@@ -133,17 +138,24 @@ export default function Download() {
     const nextPage = page + 1;
     setPage(nextPage);
     setVideos(totalVideos.slice(nextPage * 10 - 10, nextPage * 10));
+    window.scrollTo({ top: 0, behavior: "smooth" }); // 👈 스크롤 위로
   };
-
+  
   const handlePrevPage = () => {
     const prevPage = page - 1;
     setPage(prevPage);
     setVideos(totalVideos.slice(prevPage * 10 - 10, prevPage * 10));
+    window.scrollTo({ top: 0, behavior: "smooth" }); // 👈 스크롤 위로
   };
 
   const processAudio = async () => {
     if (!youtubeUrl.trim()) {
       alert("YouTube URL을 입력해주세요.");
+      return;
+    }
+    
+    if (!isValidYouTubeUrl(youtubeUrl.trim())) {
+      alert("올바른 YouTube 영상 URL을 입력해주세요.");  // ← 이걸로 통일
       return;
     }
   
@@ -157,14 +169,26 @@ export default function Download() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: youtubeUrl }),
       });
-  
+    
+      if (!response.ok) {
+        const errorData = await response.json();
+        // 400 Bad Request: 영상 길이 제한
+        if (response.status === 400) {
+          alert(errorData.detail || "요청이 거부되었습니다.");
+        } else {
+          alert("알 수 없는 오류가 발생했습니다.");
+        }
+        setSeparationLoading(false);
+        return;
+      }
+    
       const data = await response.json();
       setTaskId(data.task_id);
     } catch (error) {
       alert("분리 요청 중 오류 발생: " + error.message);
       console.error(error);
       setSeparationLoading(false);
-    }
+    }    
   };
 
 // 이후 return(...) JSX 코드 블록은 변경 없음 (디자인 유지 조건)
@@ -180,10 +204,11 @@ export default function Download() {
             YouTube Audio Separation and Streaming AI
           </Typography>
           <Typography variant="body1" align="center" sx={{ mt: 2, mb: 4 }}>
-            유튜브에서 음원을 검색하고,<br />
-            보컬과 반주(MR)를 Spleeter AI로 분리한 뒤<br />
-            바로 스트리밍하거나 다운로드해보세요.<br /><br />
-            ▶ 썸네일을 클릭하면 유튜브에서 영상 재생<br />
+            유튜브에서 음원을 검색하고 URL을 입력하면,<br />
+            Spleeter AI를 통해 보컬과 반주(MR)를 분리할 수 있습니다.<br />
+            분리된 음원을 스트리밍하거나 다운로드 해보세요.<br />
+            <br /><br />
+            ▶ 검색 후 썸네일을 클릭하면 유튜브로 이동,<br />
             ▶ 제목을 클릭하면 자동으로 아래 URL 입력칸이 채워집니다.
           </Typography>
 
@@ -306,7 +331,7 @@ export default function Download() {
             <Box sx={{ mt: 4, textAlign: "center" }}>
               <Typography variant="h6">Separated Audio</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                분리된 음성은 최대 10분까지 스트리밍하거나 다운로드 받으실 수 있습니다.
+                분리된 음성은 최대 10분 동안 스트리밍하거나 다운로드 받으실 수 있습니다.
               </Typography>
               <Box sx={{ mt: 2 }}>
                 <Typography>Vocal</Typography>
@@ -343,7 +368,7 @@ export default function Download() {
       >
         This service uses Spleeter by Deezer for audio source separation. <br />
         Spleeter is an open-source project released under the MIT License. <br />
-        Source: https://github.com/deezer/spleeter <br />
+        Source: https://github.com/deezer/spleeter <br /><br />
         Contact: taedyoverflow@gmail.com
 
         </Typography>

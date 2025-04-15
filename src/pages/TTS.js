@@ -193,7 +193,7 @@ export default function TTS() {
           This service uses Edge TTS (unofficial) for text-to-speech synthesis.<br />
           It is powered by Microsoft Edge’s neural voices through an open-source Python wrapper.<br />
           The tool 'edge-tts' is released under the MIT License.<br />
-          Source: https://github.com/rany2/edge-tts <br />
+          Source: https://github.com/rany2/edge-tts <br /><br />
           Contact: taedyoverflow@gmail.com
         </Typography>
         <Copyright />
