@@ -77,12 +77,15 @@ export default function Download() {
       console.error("결과 확인 중 오류 발생: ", error);
     }
   }, [taskId]);
-  
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page]);
+  
   useEffect(() => {
     let interval;
     if (separationLoading && taskId) {
-      setEstimatedTimeLeft(90); // 기본 90초 예상
+      setEstimatedTimeLeft(100); // 기본 100초 예상
       interval = setInterval(() => {
         checkResult();
         setEstimatedTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
@@ -138,14 +141,14 @@ export default function Download() {
     const nextPage = page + 1;
     setPage(nextPage);
     setVideos(totalVideos.slice(nextPage * 10 - 10, nextPage * 10));
-    window.scrollTo({ top: 0, behavior: "smooth" }); // 👈 스크롤 위로
   };
   
   const handlePrevPage = () => {
-    const prevPage = page - 1;
-    setPage(prevPage);
-    setVideos(totalVideos.slice(prevPage * 10 - 10, prevPage * 10));
-    window.scrollTo({ top: 0, behavior: "smooth" }); // 👈 스크롤 위로
+    if (page > 1) {
+      const prevPage = page - 1;
+      setPage(prevPage);
+      setVideos(totalVideos.slice(prevPage * 10 - 10, prevPage * 10));
+    }
   };
 
   const processAudio = async () => {
@@ -207,7 +210,7 @@ export default function Download() {
             유튜브에서 음원을 검색하고 URL을 입력하면,<br />
             Spleeter AI를 통해 보컬과 반주(MR)를 분리할 수 있습니다.<br />
             분리된 음원을 스트리밍하거나 다운로드 해보세요.<br />
-            <br /><br />
+            <br />
             ▶ 검색 후 썸네일을 클릭하면 유튜브로 이동,<br />
             ▶ 제목을 클릭하면 자동으로 아래 URL 입력칸이 채워집니다.
           </Typography>

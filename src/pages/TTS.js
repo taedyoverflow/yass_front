@@ -24,6 +24,8 @@ export default function TTS() {
   const [loading, setLoading] = useState(false);
   const [polling, setPolling] = useState(false);
   const [error, setError] = useState('');
+  const containsKorean = (text) => /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(text);
+  const containsEnglish = (text) => /[a-zA-Z]/.test(text);
 
   const voiceOptions = [
     { label: "한국어(남성)", value: "ko-KR-InJoonNeural" },
@@ -77,6 +79,20 @@ export default function TTS() {
   
     if (!selectedVoice) {
       alert("언어와 성별을 정해주세요.");
+      return;
+    }
+
+    // 언어 불일치 유효성 검사
+    const isKoreanVoice = selectedVoice.startsWith("ko-KR");
+    const isEnglishVoice = selectedVoice.startsWith("en-US");
+
+    if (isKoreanVoice && containsEnglish(text)) {
+      alert("선택한 음성이 한국어입니다. 텍스트에 영어가 포함되어 있으면 안 됩니다.");
+      return;
+    }
+
+    if (isEnglishVoice && containsKorean(text)) {
+      alert("선택한 음성이 영어입니다. 텍스트에 한글이 포함되어 있으면 안 됩니다.");
       return;
     }
   
@@ -161,7 +177,7 @@ export default function TTS() {
             <Box mt={4} textAlign="center">
               <Typography variant="h6">Generated Audio</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                변환된 음성은 최대 10분까지 스트리밍하거나 다운로드 받으실 수 있습니다.
+                변환된 음성은 최대 10분 동안 스트리밍하거나 다운로드 받으실 수 있습니다.
               </Typography>
               <Box sx={{ mt: 2 }}>
                 <audio controls src={resultAudio}></audio>
