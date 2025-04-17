@@ -46,7 +46,7 @@ export default function Download() {
   const [estimatedTimeLeft, setEstimatedTimeLeft] = useState(null);
 
   const isValidYouTubeUrl = (url) => {
-    const regex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]{11}(&.*)?$/i;
+    const regex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})(\S*)?$/i;
     return regex.test(url.trim());
   };
 
