@@ -52,15 +52,26 @@ export default function Download() {
 
   const checkResult = useCallback(async () => {
     if (!taskId) return;
+    console.log("[checkResult] Checking result for taskId:", taskId);
+  
     try {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/result/${taskId}`);
       const data = await res.json();
   
       if (data.vocal_url && data.accompaniment_url) {
+        console.log("[checkResult] Fetching audio files:");
+        console.log("vocal_url:", data.vocal_url);
+        console.log("accompaniment_url:", data.accompaniment_url);
+  
         const [vocalRes, accompRes] = await Promise.all([
           fetch(data.vocal_url),
           fetch(data.accompaniment_url),
         ]);
+  
+        if (!vocalRes.ok || !accompRes.ok) {
+          console.error("❌ 오디오 파일 fetch 실패", vocalRes.status, accompRes.status);
+          return;
+        }
   
         const vocalBlob = await vocalRes.blob();
         const accompBlob = await accompRes.blob();
@@ -68,7 +79,9 @@ export default function Download() {
         const vocalBlobUrl = URL.createObjectURL(vocalBlob);
         const accompBlobUrl = URL.createObjectURL(accompBlob);
   
-        // ✅ Blob 캐시 URL로 상태 저장
+        console.log("[checkResult] vocalBlobUrl:", vocalBlobUrl);
+        console.log("[checkResult] accompBlobUrl:", accompBlobUrl);
+  
         setVocalBlobUrl(vocalBlobUrl);
         setAccompBlobUrl(accompBlobUrl);
         setSeparationLoading(false);
@@ -76,7 +89,7 @@ export default function Download() {
     } catch (error) {
       console.error("결과 확인 중 오류 발생: ", error);
     }
-  }, [taskId]);
+  }, [taskId]);  
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -97,18 +110,7 @@ export default function Download() {
   useEffect(() => {
     console.log("✅ 백엔드 URL:", process.env.REACT_APP_BACKEND_URL);
   }, []);
-
-  useEffect(() => {
-    let interval;
-    if (separationLoading && taskId) {
-      interval = setInterval(() => {
-        checkResult();
-      }, 5000);
-    }
-    return () => clearInterval(interval);
-  }, [separationLoading, taskId, checkResult]);
   
-
   const searchVideos = async () => {
     setSearchLoading(true);
     const apiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
@@ -330,15 +332,16 @@ export default function Download() {
             </Button>
           </Box>
 
-          {!separationLoading && vocalBlobUrl && (
+          {!separationLoading && vocalBlobUrl && accompBlobUrl && (
             <Box sx={{ mt: 4, textAlign: "center" }}>
               <Typography variant="h6">Separated Audio</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                 분리된 음성은 최대 10분 동안 스트리밍하거나 다운로드 받으실 수 있습니다.
               </Typography>
+
               <Box sx={{ mt: 2 }}>
                 <Typography>Vocal</Typography>
-                <audio controls src={vocalBlobUrl}></audio>
+                <audio controls preload="auto" src={vocalBlobUrl}></audio>
                 <br />
                 <a href={vocalBlobUrl} download="vocal.wav">
                   <Button variant="outlined" sx={{ mt: 1 }}>
@@ -349,7 +352,7 @@ export default function Download() {
 
               <Box sx={{ mt: 3 }}>
                 <Typography>Accompaniment</Typography>
-                <audio controls src={accompBlobUrl}></audio>
+                <audio controls preload="auto" src={accompBlobUrl}></audio>
                 <br />
                 <a href={accompBlobUrl} download="accompaniment.wav">
                   <Button variant="outlined" sx={{ mt: 1 }}>
@@ -359,6 +362,9 @@ export default function Download() {
               </Box>
             </Box>
           )}
+
+
+
         </Container>
       </main>
 
