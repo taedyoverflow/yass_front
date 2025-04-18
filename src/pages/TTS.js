@@ -36,15 +36,15 @@ export default function TTS() {
 
   const checkResult = useCallback(async () => {
     if (!taskId) return;
+  
     try {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/result/${taskId}`);
       const data = await res.json();
+  
       if (data.url) {
-        const audioRes = await fetch(data.url);
-        const audioBlob = await audioRes.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-        setResultAudio(audioUrl);
+        setResultAudio(data.url);
         setPolling(false);
+        console.log("✅ TTS URL 직접 사용");
       }
     } catch (err) {
       setError("TTS 결과 확인 실패");
@@ -52,6 +52,7 @@ export default function TTS() {
       setPolling(false);
     }
   }, [taskId]);
+  
 
   useEffect(() => {
     let interval;

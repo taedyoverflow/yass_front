@@ -59,48 +59,16 @@ export default function Download() {
   
       if (!data.vocal_url || !data.accompaniment_url) return;
   
-      // 모바일 여부 판별
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  
-      if (vocalBlobUrl) URL.revokeObjectURL(vocalBlobUrl);
-      if (accompBlobUrl) URL.revokeObjectURL(accompBlobUrl);
-  
-      if (isMobile) {
-        // ✅ 모바일에서는 presigned URL 직접 사용
-        setVocalBlobUrl(data.vocal_url);
-        setAccompBlobUrl(data.accompaniment_url);
-        setSeparationLoading(false);
-        console.log("📱 모바일 - MinIO URL 사용");
-        return;
-      }
-  
-      // ✅ PC 환경에서는 Blob 처리
-      const [vocalRes, accompRes] = await Promise.all([
-        fetch(data.vocal_url),
-        fetch(data.accompaniment_url),
-      ]);
-  
-      if (!vocalRes.ok || !accompRes.ok) {
-        console.error("❌ fetch 실패", vocalRes.status, accompRes.status);
-        return;
-      }
-  
-      const [vocalBlob, accompBlob] = await Promise.all([
-        vocalRes.blob(),
-        accompRes.blob(),
-      ]);
-  
-      setVocalBlobUrl(URL.createObjectURL(vocalBlob));
-      setAccompBlobUrl(URL.createObjectURL(accompBlob));
+      setVocalBlobUrl(data.vocal_url);
+      setAccompBlobUrl(data.accompaniment_url);
       setSeparationLoading(false);
   
-      console.log("✅ PC - Blob 생성 완료");
+      console.log("✅ MinIO URL 직접 사용 (모바일/웹 공통)");
     } catch (error) {
       console.error("checkResult 오류:", error);
     }
-  }, [taskId, vocalBlobUrl, accompBlobUrl]);
+  }, [taskId]);  
   
-
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [page]);
