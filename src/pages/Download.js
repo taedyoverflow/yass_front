@@ -111,7 +111,7 @@ export default function Download() {
   
         checkResult(); // 상태 확인
         setEstimatedTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
+      }, 5000);
     }
   
     return () => clearInterval(interval);
