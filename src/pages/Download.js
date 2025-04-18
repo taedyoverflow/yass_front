@@ -57,7 +57,6 @@ export default function Download() {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/result/${taskId}`);
       const data = await res.json();
   
-      // ✅ 이전 방식: vocal/accomp URL 유무만 확인
       if (!data.vocal_url || !data.accompaniment_url) return;
   
       // 기존 Blob 정리
@@ -94,16 +93,20 @@ export default function Download() {
   }, [page]);
   
   useEffect(() => {
-    let intervalCheck, intervalCountdown;
-    let retryCount = 0;
+    let intervalCheck = null;
+    let intervalCountdown = null;
   
     if (separationLoading && taskId) {
-      setEstimatedTimeLeft(100); // 초기 추정값
+      // 💥 바로 시작되는 1초 카운트다운
+      setEstimatedTimeLeft(100);
+      intervalCountdown = setInterval(() => {
+        setEstimatedTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
   
-      // ① 상태 확인: 5초마다
+      // ✅ 5초마다 결과 체크는 여기 따로
+      let retryCount = 0;
       intervalCheck = setInterval(() => {
         retryCount += 1;
-  
         if (retryCount >= 20) {
           setSeparationLoading(false);
           alert("작업이 예상보다 오래 걸리고 있어요. 다시 시도해보거나 잠시 후 재시도해주세요.");
@@ -111,22 +114,16 @@ export default function Download() {
           clearInterval(intervalCountdown);
           return;
         }
-  
         checkResult();
-      }, 5000); // ✅ 실제 polling 주기
-  
-      // ② 시간 감소: 1초마다
-      intervalCountdown = setInterval(() => {
-        setEstimatedTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-      }, 1000); // ✅ 사용자 표시용
-  
+      }, 5000);
     }
   
     return () => {
       clearInterval(intervalCheck);
       clearInterval(intervalCountdown);
     };
-  }, [separationLoading, taskId, checkResult]);  
+  }, [separationLoading, taskId, checkResult]);
+  
   
   useEffect(() => {
     console.log("✅ 백엔드 URL:", process.env.REACT_APP_BACKEND_URL);
