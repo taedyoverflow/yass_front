@@ -52,44 +52,44 @@ export default function Download() {
 
   const checkResult = useCallback(async () => {
     if (!taskId) return;
+  
     console.log("[checkResult] Checking result for taskId:", taskId);
   
     try {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/result/${taskId}`);
       const data = await res.json();
   
-      if (data.vocal_url && data.accompaniment_url) {
-        console.log("[checkResult] Fetching audio files:");
-        console.log("vocal_url:", data.vocal_url);
-        console.log("accompaniment_url:", data.accompaniment_url);
+      if (!data.vocal_url || !data.accompaniment_url) return;
   
-        const [vocalRes, accompRes] = await Promise.all([
-          fetch(data.vocal_url),
-          fetch(data.accompaniment_url),
-        ]);
+      // Blob URL 생성 전 기존 객체 정리
+      if (vocalBlobUrl) URL.revokeObjectURL(vocalBlobUrl);
+      if (accompBlobUrl) URL.revokeObjectURL(accompBlobUrl);
   
-        if (!vocalRes.ok || !accompRes.ok) {
-          console.error("❌ 오디오 파일 fetch 실패", vocalRes.status, accompRes.status);
-          return;
-        }
+      const [vocalRes, accompRes] = await Promise.all([
+        fetch(data.vocal_url),
+        fetch(data.accompaniment_url),
+      ]);
   
-        const vocalBlob = await vocalRes.blob();
-        const accompBlob = await accompRes.blob();
-  
-        const vocalBlobUrl = URL.createObjectURL(vocalBlob);
-        const accompBlobUrl = URL.createObjectURL(accompBlob);
-  
-        console.log("[checkResult] vocalBlobUrl:", vocalBlobUrl);
-        console.log("[checkResult] accompBlobUrl:", accompBlobUrl);
-  
-        setVocalBlobUrl(vocalBlobUrl);
-        setAccompBlobUrl(accompBlobUrl);
-        setSeparationLoading(false);
+      if (!vocalRes.ok || !accompRes.ok) {
+        console.error("❌ 오디오 파일 fetch 실패", vocalRes.status, accompRes.status);
+        return;
       }
+  
+      const [vocalBlob, accompBlob] = await Promise.all([
+        vocalRes.blob(),
+        accompRes.blob(),
+      ]);
+  
+      setVocalBlobUrl(URL.createObjectURL(vocalBlob));
+      setAccompBlobUrl(URL.createObjectURL(accompBlob));
+      setSeparationLoading(false);
+  
+      console.log("[checkResult] Blob 생성 완료");
     } catch (error) {
       console.error("결과 확인 중 오류 발생: ", error);
     }
-  }, [taskId]);  
+  }, [taskId, vocalBlobUrl, accompBlobUrl]);
+  
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
