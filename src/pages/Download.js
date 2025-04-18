@@ -94,30 +94,40 @@ export default function Download() {
   }, [page]);
   
   useEffect(() => {
-    let interval;
+    let intervalCheck, intervalCountdown;
     let retryCount = 0;
   
     if (separationLoading && taskId) {
       setEstimatedTimeLeft(100); // 초기 추정값
-      interval = setInterval(() => {
+  
+      // ① 상태 확인: 5초마다
+      intervalCheck = setInterval(() => {
         retryCount += 1;
   
-        if (retryCount >= 100) {
+        if (retryCount >= 20) {
           setSeparationLoading(false);
           alert("작업이 예상보다 오래 걸리고 있어요. 다시 시도해보거나 잠시 후 재시도해주세요.");
-          clearInterval(interval);
+          clearInterval(intervalCheck);
+          clearInterval(intervalCountdown);
           return;
         }
   
-        checkResult(); // 상태 확인
+        checkResult();
+      }, 5000); // ✅ 실제 polling 주기
+  
+      // ② 시간 감소: 1초마다
+      intervalCountdown = setInterval(() => {
         setEstimatedTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-      }, 5000);
+      }, 1000); // ✅ 사용자 표시용
+  
     }
   
-    return () => clearInterval(interval);
-  }, [separationLoading, taskId, checkResult]);
+    return () => {
+      clearInterval(intervalCheck);
+      clearInterval(intervalCountdown);
+    };
+  }, [separationLoading, taskId, checkResult]);  
   
-
   useEffect(() => {
     console.log("✅ 백엔드 URL:", process.env.REACT_APP_BACKEND_URL);
   }, []);
