@@ -52,43 +52,51 @@ export default function Download() {
 
   const checkResult = useCallback(async () => {
     if (!taskId) return;
-  
     console.log("[checkResult] Checking result for taskId:", taskId);
   
     try {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/result/${taskId}`);
       const data = await res.json();
   
-      if (!data.vocal_url || !data.accompaniment_url) return;
+      // 상태 기반 분리 완료 체크
+      if (data.status === "SUCCESS") {
+        console.log("✅ 상태: SUCCESS");
   
-      // Blob URL 생성 전 기존 객체 정리
-      if (vocalBlobUrl) URL.revokeObjectURL(vocalBlobUrl);
-      if (accompBlobUrl) URL.revokeObjectURL(accompBlobUrl);
+        setSeparationLoading(false); // 로딩 해제
   
-      const [vocalRes, accompRes] = await Promise.all([
-        fetch(data.vocal_url),
-        fetch(data.accompaniment_url),
-      ]);
+        if (data.vocal_url && data.accompaniment_url) {
+          // Blob URL이 존재하면 정리
+          if (vocalBlobUrl) URL.revokeObjectURL(vocalBlobUrl);
+          if (accompBlobUrl) URL.revokeObjectURL(accompBlobUrl);
   
-      if (!vocalRes.ok || !accompRes.ok) {
-        console.error("❌ 오디오 파일 fetch 실패", vocalRes.status, accompRes.status);
-        return;
+          const [vocalRes, accompRes] = await Promise.all([
+            fetch(data.vocal_url),
+            fetch(data.accompaniment_url),
+          ]);
+  
+          if (!vocalRes.ok || !accompRes.ok) {
+            console.error("❌ 오디오 fetch 실패", vocalRes.status, accompRes.status);
+            return;
+          }
+  
+          const [vocalBlob, accompBlob] = await Promise.all([
+            vocalRes.blob(),
+            accompRes.blob(),
+          ]);
+  
+          setVocalBlobUrl(URL.createObjectURL(vocalBlob));
+          setAccompBlobUrl(URL.createObjectURL(accompBlob));
+          console.log("[checkResult] Blob 생성 완료");
+        } else {
+          console.warn("🎵 분리는 완료됐지만, URL은 아직 준비되지 않음");
+        }
+      } else {
+        console.log("⏳ 아직 작업 진행 중 (status: " + data.status + ")");
       }
-  
-      const [vocalBlob, accompBlob] = await Promise.all([
-        vocalRes.blob(),
-        accompRes.blob(),
-      ]);
-  
-      setVocalBlobUrl(URL.createObjectURL(vocalBlob));
-      setAccompBlobUrl(URL.createObjectURL(accompBlob));
-      setSeparationLoading(false);
-  
-      console.log("[checkResult] Blob 생성 완료");
     } catch (error) {
-      console.error("결과 확인 중 오류 발생: ", error);
+      console.error("결과 확인 중 오류 발생:", error);
     }
-  }, [taskId, vocalBlobUrl, accompBlobUrl]);
+  }, [taskId, vocalBlobUrl, accompBlobUrl]);  
   
 
   useEffect(() => {
@@ -97,15 +105,28 @@ export default function Download() {
   
   useEffect(() => {
     let interval;
+    let retryCount = 0;
+  
     if (separationLoading && taskId) {
-      setEstimatedTimeLeft(100); // 기본 100초 예상
+      setEstimatedTimeLeft(100); // 초기 추정값
       interval = setInterval(() => {
-        checkResult();
+        retryCount += 1;
+  
+        if (retryCount >= 100) {
+          setSeparationLoading(false);
+          alert("작업이 예상보다 오래 걸리고 있어요. 다시 시도해보거나 잠시 후 재시도해주세요.");
+          clearInterval(interval);
+          return;
+        }
+  
+        checkResult(); // 상태 확인
         setEstimatedTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
       }, 1000);
     }
+  
     return () => clearInterval(interval);
-  }, [separationLoading, taskId, checkResult]); 
+  }, [separationLoading, taskId, checkResult]);
+  
 
   useEffect(() => {
     console.log("✅ 백엔드 URL:", process.env.REACT_APP_BACKEND_URL);
