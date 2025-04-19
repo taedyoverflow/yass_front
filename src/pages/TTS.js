@@ -138,31 +138,31 @@ export default function TTS() {
           <Typography variant="h4" gutterBottom align="center">Text-to-Speech AI <br/>텍스트를 음성으로 변환</Typography>
 
           <Box sx={{ width: '100%', maxWidth: 400, mt: 2 }}>
-          <TextField
-            label="Enter Text"
-            value={text}
-            onChange={(e) => {
-              const input = e.target.value;
-              if (input.length > 1000) {
-                setTextError("텍스트는 1000자 이내로 입력해주세요.");
-              } else {
+            <TextField
+              label="Enter Text"
+              value={text}
+              onChange={(e) => {
+                const input = e.target.value;
                 setText(input);
-                setTextError('');
-              }
-            }}
-            margin="normal"
-            fullWidth
-            multiline
-            rows={4}
-            error={Boolean(textError)}
-            helperText={textError}
-            inputProps={{ maxLength: 1000 }}
-            sx={{
-              '& .MuiInputBase-root textarea': {
-                resize: 'vertical'
-              }
-            }}
-          />
+
+                if (input.length > 1000) {
+                  setTextError(`현재 ${input.length}자 입력됨 (최대 1000자까지 가능)`);
+                } else {
+                  setTextError('');
+                }
+              }}
+              margin="normal"
+              fullWidth
+              multiline
+              rows={4}
+              error={Boolean(textError)}
+              helperText={textError || `${text.length}/1000`}
+              sx={{
+                '& .MuiInputBase-root textarea': {
+                  resize: 'vertical'
+                }
+              }}
+            />
           </Box>
 
           <FormControl fullWidth sx={{ mt: 2, width: '100%', maxWidth: 400 }}>
