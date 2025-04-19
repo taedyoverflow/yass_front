@@ -10,6 +10,7 @@ import Download from "./pages/Download"
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import BasicPitch from "./pages/BasicPitch";
 
 function App() {
   // TODO remove, this demo shouldn't need to reset the theme.
@@ -28,7 +29,7 @@ function App() {
           {/* <Route path="/" element={<Home />} /> */}
           {/* <Route path="/separation" element={<Separation />} /> */}
           {/* <Route path="/inference" element={<Inference />} /> */}
-          {/* <Route path="/train" element={<Train />} /> */}
+          <Route path="/pitch" element={<BasicPitch />} /> */
           <Route path="/tts" element={<TTS />} />
           <Route path="/" element={<Download />} />
         </Routes>
