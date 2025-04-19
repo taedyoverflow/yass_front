@@ -30,8 +30,8 @@ export default function BasicPitch() {
             <Typography variant="h6">서비스 준비중입니다.</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             음성, 음악, 비전 등 다양한 AI 서비스가 지속적으로 추가될 예정입니다.<br />
-            서비스 제안이나 기능 오류 등 운영자와의 연락이 필요한 경우,<br />
-            아래의 Contact 이메일을 참고해 주세요.<br /><br />
+            서비스 제안이나 기능 관련 오류가 있을 경우,<br />
+            taedyoverflow@gmail.com 으로 메일을 보내주세요.<br /><br />
 
             I am developing an AI-powered service that converts<br />
             accompaniment audio files into MIDI (sheet music) using the Basic Pitch model.<br />
