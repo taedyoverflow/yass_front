@@ -26,6 +26,7 @@ export default function TTS() {
   const [error, setError] = useState('');
   const containsKorean = (text) => /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(text);
   const containsEnglish = (text) => /[a-zA-Z]/.test(text);
+  const [textError, setTextError] = useState('');
 
   const voiceOptions = [
     { label: "한국어(남성)", value: "ko-KR-InJoonNeural" },
@@ -82,16 +83,22 @@ export default function TTS() {
       alert("언어와 성별을 정해주세요.");
       return;
     }
-
+  
+    // 텍스트 길이 유효성 검사 추가
+    if (text.length > 1000) {
+      alert("텍스트는 1000자 이내로 입력해주세요.");
+      return;
+    }
+  
     // 언어 불일치 유효성 검사
     const isKoreanVoice = selectedVoice.startsWith("ko-KR");
     const isEnglishVoice = selectedVoice.startsWith("en-US");
-
+  
     if (isKoreanVoice && containsEnglish(text)) {
       alert("선택한 음성이 한국어입니다. 텍스트에 영어가 포함되어 있으면 안 됩니다.");
       return;
     }
-
+  
     if (isEnglishVoice && containsKorean(text)) {
       alert("선택한 음성이 영어입니다. 텍스트에 한글이 포함되어 있으면 안 됩니다.");
       return;
@@ -121,6 +128,7 @@ export default function TTS() {
     }
   };
   
+  
 
   return (
     <>
@@ -130,15 +138,31 @@ export default function TTS() {
           <Typography variant="h4" gutterBottom align="center">Text-to-Speech AI <br/>텍스트를 음성으로 변환</Typography>
 
           <Box sx={{ width: '100%', maxWidth: 400, mt: 2 }}>
-            <TextField
-              label="Enter Text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              margin="normal"
-              fullWidth
-              multiline
-              rows={4}
-            />
+          <TextField
+            label="Enter Text"
+            value={text}
+            onChange={(e) => {
+              const input = e.target.value;
+              if (input.length > 1000) {
+                setTextError("텍스트는 1000자 이내로 입력해주세요.");
+              } else {
+                setText(input);
+                setTextError('');
+              }
+            }}
+            margin="normal"
+            fullWidth
+            multiline
+            rows={4}
+            error={Boolean(textError)}
+            helperText={textError}
+            inputProps={{ maxLength: 1000 }}
+            sx={{
+              '& .MuiInputBase-root textarea': {
+                resize: 'vertical'
+              }
+            }}
+          />
           </Box>
 
           <FormControl fullWidth sx={{ mt: 2, width: '100%', maxWidth: 400 }}>
