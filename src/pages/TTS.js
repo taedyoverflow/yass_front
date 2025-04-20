@@ -202,7 +202,7 @@ export default function TTS() {
             <Box mt={4} textAlign="center">
               <Typography variant="h6">Generated Audio</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                변환된 음성은 최대 10분 동안 스트리밍하거나 다운로드 받으실 수 있습니다.
+                변환된 음성은 최대 5분 동안 스트리밍하거나 다운로드 받으실 수 있습니다.
               </Typography>
               <Box sx={{ mt: 2 }}>
                 <audio controls src={resultAudio}></audio>

@@ -27,11 +27,11 @@ export default function BasicPitch() {
           </Typography>
 
           <Box mt={4} textAlign="center">
-            <Typography variant="h6">서비스 준비중입니다.</Typography>
+            <Typography variant="h6" sx={{ mb: 3 }}>서비스 준비중입니다.</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             음성, 음악, 비전 등 다양한 AI 서비스가 지속적으로 추가될 예정입니다.<br />
             서비스 제안이나 기능 관련 오류가 있을 경우,<br />
-            taedyoverflow@gmail.com 으로 메일을 보내주세요.<br /><br />
+            taedyoverflow@gmail.com 으로 메일을 보내주세요.<br /><br /><br />
 
             I am developing an AI-powered service that converts<br />
             accompaniment audio files into MIDI (sheet music) using the Basic Pitch model.<br />

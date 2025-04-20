@@ -335,7 +335,7 @@ export default function Download() {
             <Box sx={{ mt: 4, textAlign: "center" }}>
               <Typography variant="h6">Separated Audio</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                분리된 음성은 최대 10분 동안 스트리밍하거나 다운로드 받으실 수 있습니다.
+                분리된 음성은 최대 5분 동안 스트리밍하거나 다운로드 받으실 수 있습니다.
               </Typography>
 
               <Box sx={{ mt: 2 }}>
