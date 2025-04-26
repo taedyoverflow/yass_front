@@ -4,7 +4,7 @@
 
 YouTube Audio Separation and Streaming AI  
 유튜브 음원을 검색하고 URL을 입력하면,  
-Demucs AI를 통해 보컬, 드럼, 베이스, 기타(기타 악기 포함)를 분리할 수 있습니다.  
+Spleeter 또는 Demucs AI를 통해 보컬, 반주, 드럼, 베이스, 기타(기타 악기 포함)를 분리할 수 있습니다.  
 또한 텍스트 입력만으로 자연스러운 음성을 생성하는  
 Edge-TTS 기반 TTS(Text-to-Speech) 기능도 함께 제공합니다.  
 분리된 음원과 변환된 음성은 스트리밍하거나 다운로드할 수 있습니다.  
@@ -24,8 +24,11 @@ Edge-TTS 기반 TTS(Text-to-Speech) 기능도 함께 제공합니다.
 - **YouTube Search**: 유튜브 영상 검색 및 썸네일 리스트 제공  
   👉 **Google의 YouTube Data API v3 사용**  
   👉 **영상 썸네일 클릭 시 URL 입력란에 자동 채워지는 UX 적용**
-- **Audio Separation**: 보컬 / 드럼 / 베이스 / 기타 악기 분리 (powered by Demucs)
-  - 기존에는 Spleeter를 사용했으나, 보다 자연스러운 분리 품질을 위해 Demucs로 전환
+- **Audio Separation**:  
+  - Spleeter 기반 보컬 / 반주 분리
+  - Demucs 기반 보컬 / 드럼 / 베이스 / 기타 악기 분리
+  - ✅ **초기에는 Spleeter만 사용했지만, 보다 자연스러운 다중 악기 분리를 위해 Demucs를 추가 도입했습니다.**
+  - ✅ 현재는 사용자가 원하는 모델(Spleeter 또는 Demucs)로 선택하여 분리할 수 있습니다.
 - **Streaming & Download**:  
   ✅ 초기엔 Blob 스트리밍을 사용했지만,  
   📱 모바일 Chrome/Safari의 미디어 재생 이슈, 속도 저하 등을 고려하여  
@@ -69,6 +72,7 @@ graph TD
 - FastAPI (메인 API 서버)
 - YouTube Data API v3: **검색어 기반 유튜브 영상 검색 기능 구현에 사용**
 - yt-dlp: YouTube 오디오 다운로드
+- Spleeter: 오디오 소스 분리 (보컬/반주)
 - Demucs: 오디오 소스 분리 (보컬/드럼/베이스/기타 악기)
   - ✅ **싱글톤(Singleton) + 락 기반 처리**로 리소스 충돌 방지 및 안정성 확보
 - Edge-TTS: 텍스트 음성 합성 (TTS)
@@ -90,7 +94,7 @@ graph TD
 
 1. 유저가 YouTube URL 또는 TTS 텍스트 입력 후 요청  
 2. FastAPI는 해당 요청을 Celery 태스크로 전달하고 `task_id` 반환  
-3. Celery Worker는 yt-dlp로 오디오 다운로드 → Demucs 분리 또는 TTS 합성  
+3. Celery Worker는 yt-dlp로 오디오 다운로드 → Spleeter 또는 Demucs 분리 → TTS 합성  
 4. MinIO에 결과 파일 저장 (일정 시간 후 자동 삭제)  
 5. FastAPI는 task_id 기반으로 상태 및 결과를 주기적으로 확인  
 6. 완료된 결과 파일은 MinIO의 정적 URL로 프론트에 전달됨  
@@ -103,6 +107,7 @@ graph TD
 - 직접 필요해서 만들었어요  
 - 아무도 개발 안 시켜줘서 스스로 만들어봤습니다  
 - 실전에서 돌아가는 AI 웹서비스를 구현해보고 싶었어요
+- ✅ **Spleeter와 Demucs 모두 활용하여 다양한 사용자 요구를 충족할 수 있도록 기능을 확장했습니다.**
 
 ---
 

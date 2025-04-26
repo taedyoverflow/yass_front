@@ -225,16 +225,12 @@ export default function TTS() {
       </main>
 
       <Box sx={{ bgcolor: "background.paper", p: 6 }} component="footer">
-        <Typography 
-          variant="body2"
-          align="center" 
-          color="text.secondary"
-          sx={{ fontSize: "0.875rem" }}
-        >
-          This service uses Edge TTS (unofficial) for text-to-speech synthesis.<br />
-          It is powered by Microsoft Edge’s neural voices through an open-source Python wrapper.<br />
-          The tool 'edge-tts' is released under the MIT License.<br />
-          Source: https://github.com/rany2/edge-tts <br /><br />
+        <Typography variant="body2" align="center" color="text.secondary" sx={{ fontSize: "0.875rem" }}>
+          This service uses <strong>Edge TTS</strong> (unofficial) for text-to-speech synthesis.<br />
+          Edge TTS is an open-source text-to-speech synthesis tool developed by the community.<br />
+          It is powered by Microsoft Edge’s neural voices.<br />
+          The tool 'edge-tts' is released under the MIT License.<br /><br />
+
           Contact: taedyoverflow@gmail.com
         </Typography>
         <Copyright />

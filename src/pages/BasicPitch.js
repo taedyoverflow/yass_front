@@ -232,10 +232,11 @@ export default function BasicPitch() {
           color="text.secondary"
           sx={{ fontSize: "0.875rem" }}
         >
-          This service uses Basic Pitch (open-source) for audio-to-MIDI conversion.<br />
-          Powered by Spotify’s neural pitch detection model via a Python implementation.<br />
-          The tool 'basic-pitch' is released under the MIT License.<br />
-          Source: https://github.com/spotify/basic-pitch <br /><br />
+          This service uses <strong>Basic Pitch</strong> for audio-to-MIDI conversion.<br />
+          Basic Pitch is an open-source audio-to-MIDI conversion tool developed by Spotify.<br />
+          It is powered by Spotify’s neural pitch detection model via a Python implementation.<br />
+          The tool 'basic-pitch' is released under the MIT License.
+          <br /><br />
           Contact: taedyoverflow@gmail.com
         </Typography>
         <Copyright />
