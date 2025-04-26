@@ -109,8 +109,7 @@ export default function BasicPitch() {
           sx={{ mb: 2 }}
         >
           Beta 서비스 안내: <br />
-          베타 서비스 중에는 서버와 연결이 끊어지거나, <br />
-          악보의 정확성을 보장할 수 없습니다. <br />
+          베타 서비스 중에는 악보의 정확성을 보장할 수 없습니다. <br />
           지속적으로 고도화 및 유지보수 중입니다.<br/><br />
         </Typography>
           <Typography variant="h4" align="center" gutterBottom>

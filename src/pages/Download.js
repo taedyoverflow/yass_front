@@ -210,7 +210,8 @@ const processAudioSpleeter = async () => {
       <main>
         <Container sx={{ py: 8 }} maxWidth="md">
           <Typography variant="h4" gutterBottom align="center">
-            YouTube Audio Separation and Streaming AI
+            YouTube Audio <br />
+            Separation and Streaming AI
           </Typography>
           <Typography variant="body1" align="center" sx={{ mt: 2, mb: 4 }}>
             유튜브에서 음원을 검색하고 URL을 입력하면,<br />
@@ -348,7 +349,7 @@ const processAudioSpleeter = async () => {
           {/* 결과 출력 (Spleeter) */}
             {!separationLoadingSpleeter && vocalBlobUrlSpleeter && accompBlobUrl && (
               <Box sx={{ mt: 4, textAlign: "center" }}>
-                <Typography variant="h6">Separated Audio</Typography>
+                <Typography variant="h6">Separated by Spleeter</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   분리된 음성은 최대 5분 동안 스트리밍하거나 다운로드 받으실 수 있습니다.
                 </Typography>
@@ -386,6 +387,9 @@ const processAudioSpleeter = async () => {
             {!separationLoadingDemucs && vocalBlobUrlDemucs && drumsBlobUrl && bassBlobUrl && otherBlobUrl && (
               <Box sx={{ mt: 5, textAlign: "center" }}>
                 <Typography variant="h6">Separated by Demucs</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  분리된 음성은 최대 5분 동안 스트리밍하거나 다운로드 받으실 수 있습니다.
+                </Typography>
                 {[
                   ["Vocal", vocalBlobUrlDemucs],
                   ["Drums", drumsBlobUrl],
