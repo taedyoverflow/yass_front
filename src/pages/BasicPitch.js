@@ -102,6 +102,14 @@ export default function BasicPitch() {
 
       <main style={{ position: "relative" }}>
         <Container sx={{ py: 8 }} maxWidth="md">
+        <Typography
+          variant="body1"
+          align="center"
+          color="text.secondary"
+          sx={{ mb: 2 }}
+        >
+          Beta 서비스 안내: 베타 서비스 중이므로 악보의 정확성을 보장할 수 없습니다.
+        </Typography>
           <Typography variant="h4" align="center" gutterBottom>
             Audio to MIDI AI
           </Typography>
@@ -184,45 +192,6 @@ export default function BasicPitch() {
             </Box>
           )}
         </Container>
-
-        {/* 서비스 준비중 오버레이 */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            bgcolor: "rgba(255, 255, 255, 1)", // 조금 더 투명하게 수정
-            zIndex: 10,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            textAlign: "center",
-            p: 4,
-          }}
-        >
-          <Box sx={{ maxWidth: 600 }}>
-            <Typography variant="h4" gutterBottom>
-              <br /> Audio to MIDI AI <br />
-              서비스 준비중입니다
-            </Typography>
-            <Typography variant="body1" sx={{ mt: 2 }}>
-              <br />음성, 음악, 비전 등 다양한 AI 서비스가 지속적으로 추가될 예정입니다.<br />
-              서비스 제안이나 기능 관련 오류가 있을 경우,<br />
-              <strong>taedyoverflow@gmail.com</strong> 으로 메일을 보내주세요.
-            </Typography>
-
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 5 }}>
-            I am developing an AI-powered service that converts<br />
-            accompaniment audio files into MIDI (sheet music) using the Basic Pitch model.<br />
-            Various AI features—including voice, music, and vision—will continue to be added.<br />
-            If you have service suggestions or need to report a bug,<br />
-            please refer to the Contact email below.
-            </Typography>
-          </Box>
-        </Box>
       </main>
 
       <Box sx={{ bgcolor: "background.paper", p: 6 }} component="footer">

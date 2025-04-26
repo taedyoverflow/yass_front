@@ -16,9 +16,7 @@ function Copyright() {
   return (
     <Typography variant="body2" color="text.secondary" align="center">
       {"Copyright © "}
-      <Link color="inherit" href="/">
-        YASS AI
-      </Link>{" "}
+      <Link color="inherit" href="/">YASS AI</Link>{" "}
       {new Date().getFullYear()}
       {"."}
     </Typography>
@@ -54,6 +52,9 @@ export default function Download() {
   const [page, setPage] = useState(1);
   const [totalVideos, setTotalVideos] = useState([]);
   const inputRef = useRef(null);
+
+  const [estimatedTimeLeftDemucs, setEstimatedTimeLeftDemucs] = useState(null);
+  const [estimatedTimeLeftSpleeter, setEstimatedTimeLeftSpleeter] = useState(null);
 
   const checkResultDemucs = useCallback(async () => {
     if (!taskIdDemucs) return;
@@ -91,18 +92,38 @@ export default function Download() {
 
   useEffect(() => {
     let intervalCheck = null;
+    let intervalCountdown = null;
+
     if (separationLoadingDemucs && taskIdDemucs) {
+      setEstimatedTimeLeftDemucs(200);
+      intervalCountdown = setInterval(() => {
+        setEstimatedTimeLeftDemucs((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
       intervalCheck = setInterval(checkResultDemucs, 5000);
     }
-    return () => clearInterval(intervalCheck);
+
+    return () => {
+      clearInterval(intervalCheck);
+      clearInterval(intervalCountdown);
+    };
   }, [separationLoadingDemucs, taskIdDemucs, checkResultDemucs]);
 
   useEffect(() => {
     let intervalCheck = null;
+    let intervalCountdown = null;
+
     if (separationLoadingSpleeter && taskIdSpleeter) {
+      setEstimatedTimeLeftSpleeter(100);
+      intervalCountdown = setInterval(() => {
+        setEstimatedTimeLeftSpleeter((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
       intervalCheck = setInterval(checkResultSpleeter, 5000);
     }
-    return () => clearInterval(intervalCheck);
+
+    return () => {
+      clearInterval(intervalCheck);
+      clearInterval(intervalCountdown);
+    };
   }, [separationLoadingSpleeter, taskIdSpleeter, checkResultSpleeter]);
 
   const searchVideos = async () => {
@@ -154,7 +175,7 @@ export default function Download() {
     setDrumsBlobUrl("");
     setBassBlobUrl("");
     setOtherBlobUrl("");
-
+  
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio_demucs/`, {
         method: "POST",
@@ -163,11 +184,13 @@ export default function Download() {
       });
       const data = await response.json();
       setTaskIdDemucs(data.task_id);
+      setEstimatedTimeLeftDemucs(200); // ✅ TaskID 받은 이후에 카운트다운 시작
     } catch (error) {
       alert("Demucs 분리 요청 오류: " + error.message);
       setSeparationLoadingDemucs(false);
     }
   };
+  
 
   const processAudioSpleeter = async () => {
     if (!youtubeUrl.trim()) {
@@ -177,7 +200,7 @@ export default function Download() {
     setSeparationLoadingSpleeter(true);
     setVocalBlobUrlSpleeter("");
     setAccompBlobUrl("");
-
+  
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio/`, {
         method: "POST",
@@ -186,11 +209,13 @@ export default function Download() {
       });
       const data = await response.json();
       setTaskIdSpleeter(data.task_id);
+      setEstimatedTimeLeftSpleeter(100); // ✅ TaskID 받은 이후에 카운트다운 시작
     } catch (error) {
       alert("Spleeter 분리 요청 오류: " + error.message);
       setSeparationLoadingSpleeter(false);
     }
   };
+  
 
   return (
     <>
@@ -204,8 +229,7 @@ export default function Download() {
           <Typography variant="body1" align="center" sx={{ mt: 2, mb: 4 }}>
             유튜브에서 음원을 검색하고 URL을 입력하면,<br />
             Spleeter(보컬/반주) 또는 Demucs(보컬/드럼/베이스/그 외)<br />
-            AI를 통해 음원을 분리할 수 있습니다.<br />
-            <br />
+            AI를 통해 음원을 분리할 수 있습니다.<br /><br />
             ▶ 검색 후 썸네일을 클릭하면 유튜브로 이동,<br />
             ▶ 제목을 클릭하면 자동으로 아래 URL 입력칸이 채워집니다.
           </Typography>
@@ -271,7 +295,7 @@ export default function Download() {
             <Button onClick={handleNextPage} disabled={page * 10 >= totalVideos.length} sx={{ m: 1 }}>Next</Button>
           </Box>
 
-          {/* YouTube URL 입력칸 + 버튼 2개 */}
+          {/* YouTube URL 입력칸 + 분리 버튼 2개 */}
           <Box
             sx={{
               display: "flex",
@@ -294,15 +318,15 @@ export default function Download() {
                 variant="contained"
                 onClick={processAudioSpleeter}
                 disabled={separationLoadingSpleeter}
-                sx={{ flex: 1 }}
+                sx={{ flex: 1, whiteSpace: "nowrap" }}
               >
                 {separationLoadingSpleeter ? (
                   <>
                     <CircularProgress size={20} sx={{ mr: 1 }} />
-                    Spleeter Separating...
+                    Spleeter Separating... ({estimatedTimeLeftSpleeter}s left)
                   </>
                 ) : (
-                  "Spleeter(2track)"
+                  "Spleeter (2 Track)"
                 )}
               </Button>
 
@@ -310,15 +334,15 @@ export default function Download() {
                 variant="contained"
                 onClick={processAudioDemucs}
                 disabled={separationLoadingDemucs}
-                sx={{ flex: 1 }}
+                sx={{ flex: 1, whiteSpace: "nowrap" }}
               >
                 {separationLoadingDemucs ? (
                   <>
                     <CircularProgress size={20} sx={{ mr: 1 }} />
-                    Demucs Separating...
+                    Demucs Separating... ({estimatedTimeLeftDemucs}s left)
                   </>
                 ) : (
-                  "Demucs(4track)"
+                  "Demucs (4 Track)"
                 )}
               </Button>
             </Box>
@@ -330,17 +354,21 @@ export default function Download() {
               <Typography variant="h6">Separated by Spleeter</Typography>
               <Box sx={{ mt: 2 }}>
                 <Typography>Vocal</Typography>
-                <audio controls preload="auto" src={vocalBlobUrlSpleeter}></audio>
-                <a href={vocalBlobUrlSpleeter} download="vocal.wav">
-                  <Button variant="outlined" sx={{ mt: 1 }}>Download Vocal</Button>
-                </a>
+                <audio controls preload="auto" src={vocalBlobUrlSpleeter} style={{ width: "100%" }} />
+                <Box sx={{ mt: 1 }}>
+                  <a href={vocalBlobUrlSpleeter} download="vocal.wav">
+                    <Button variant="outlined" fullWidth>Download Vocal</Button>
+                  </a>
+                </Box>
               </Box>
               <Box sx={{ mt: 3 }}>
                 <Typography>Accompaniment</Typography>
-                <audio controls preload="auto" src={accompBlobUrl}></audio>
-                <a href={accompBlobUrl} download="accompaniment.wav">
-                  <Button variant="outlined" sx={{ mt: 1 }}>Download Accompaniment</Button>
-                </a>
+                <audio controls preload="auto" src={accompBlobUrl} style={{ width: "100%" }} />
+                <Box sx={{ mt: 1 }}>
+                  <a href={accompBlobUrl} download="accompaniment.wav">
+                    <Button variant="outlined" fullWidth>Download Accompaniment</Button>
+                  </a>
+                </Box>
               </Box>
             </Box>
           )}
@@ -349,31 +377,35 @@ export default function Download() {
           {!separationLoadingDemucs && vocalBlobUrlDemucs && drumsBlobUrl && bassBlobUrl && otherBlobUrl && (
             <Box sx={{ mt: 5, textAlign: "center" }}>
               <Typography variant="h6">Separated by Demucs</Typography>
-              {[["Vocal", vocalBlobUrlDemucs], ["Drums", drumsBlobUrl], ["Bass", bassBlobUrl], ["Other", otherBlobUrl]].map(([label, url]) => (
+              {[
+                ["Vocal", vocalBlobUrlDemucs],
+                ["Drums", drumsBlobUrl],
+                ["Bass", bassBlobUrl],
+                ["Other", otherBlobUrl]
+              ].map(([label, url]) => (
                 <Box key={label} sx={{ mt: 2 }}>
                   <Typography>{label}</Typography>
-                  <audio controls preload="auto" src={url}></audio>
-                  <a href={url} download={`${label.toLowerCase()}.wav`}>
-                    <Button variant="outlined" sx={{ mt: 1 }}>Download {label}</Button>
-                  </a>
+                  <audio controls preload="auto" src={url} style={{ width: "100%" }} />
+                  <Box sx={{ mt: 1 }}>
+                    <a href={url} download={`${label.toLowerCase()}.wav`}>
+                      <Button variant="outlined" fullWidth>Download {label}</Button>
+                    </a>
+                  </Box>
                 </Box>
               ))}
             </Box>
           )}
-
         </Container>
       </main>
 
       <Box sx={{ bgcolor: "background.paper", p: 6 }} component="footer">
-      <Typography variant="body2" align="center" color="text.secondary" sx={{ fontSize: "0.875rem" }}>
-        This service uses <strong>Spleeter</strong> and <strong>Demucs</strong> for audio source separation.<br />
-        Spleeter is an open-source music source separation tool developed by Deezer Research.<br />
-        Demucs is an open-source music source separation model developed by Facebook AI Research.<br />
-        Both tools are released under the MIT License.<br /><br />
-        Contact: taedyoverflow@gmail.com
-      </Typography>
-
-
+        <Typography variant="body2" align="center" color="text.secondary" sx={{ fontSize: "0.875rem" }}>
+          This service uses <strong>Spleeter</strong> and <strong>Demucs</strong> for audio source separation.<br />
+          Spleeter is an open-source music source separation tool developed by Deezer Research.<br />
+          Demucs is an open-source music source separation model developed by Facebook AI Research.<br />
+          Both tools are released under the MIT License.<br /><br />
+          Contact: taedyoverflow@gmail.com
+        </Typography>
         <Copyright />
       </Box>
     </>
