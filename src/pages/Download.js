@@ -157,47 +157,51 @@ export default function Download() {
     }
   };
 
-  const processAudioDemucs = async () => {
-    if (!youtubeUrl.trim()) { alert("YouTube URL을 입력해주세요."); return; }
-    setSeparationLoadingDemucs(true);
-    setVocalBlobUrlDemucs("");
-    setDrumsBlobUrl("");
-    setBassBlobUrl("");
-    setOtherBlobUrl("");
+// processAudioDemucs 안에 추가
+const processAudioDemucs = async () => {
+  if (!youtubeUrl.trim()) { alert("YouTube URL을 입력해주세요."); return; }
+  setSeparationLoadingDemucs(true);
+  setVocalBlobUrlDemucs("");
+  setDrumsBlobUrl("");
+  setBassBlobUrl("");
+  setOtherBlobUrl("");
+  setEstimatedTimeLeftDemucs(200); // ✅ 추가
 
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio_demucs/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: youtubeUrl }),
-      });
-      const data = await response.json();
-      setTaskIdDemucs(data.task_id);
-    } catch (error) {
-      alert("Demucs 분리 요청 오류: " + error.message);
-      setSeparationLoadingDemucs(false);
-    }
-  };
+  try {
+    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio_demucs/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: youtubeUrl }),
+    });
+    const data = await response.json();
+    setTaskIdDemucs(data.task_id);
+  } catch (error) {
+    alert("Demucs 분리 요청 오류: " + error.message);
+    setSeparationLoadingDemucs(false);
+  }
+};
 
-  const processAudioSpleeter = async () => {
-    if (!youtubeUrl.trim()) { alert("YouTube URL을 입력해주세요."); return; }
-    setSeparationLoadingSpleeter(true);
-    setVocalBlobUrlSpleeter("");
-    setAccompBlobUrl("");
+// processAudioSpleeter 안에 추가
+const processAudioSpleeter = async () => {
+  if (!youtubeUrl.trim()) { alert("YouTube URL을 입력해주세요."); return; }
+  setSeparationLoadingSpleeter(true);
+  setVocalBlobUrlSpleeter("");
+  setAccompBlobUrl("");
+  setEstimatedTimeLeftSpleeter(100); // ✅ 추가
 
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: youtubeUrl }),
-      });
-      const data = await response.json();
-      setTaskIdSpleeter(data.task_id);
-    } catch (error) {
-      alert("Spleeter 분리 요청 오류: " + error.message);
-      setSeparationLoadingSpleeter(false);
-    }
-  };
+  try {
+    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: youtubeUrl }),
+    });
+    const data = await response.json();
+    setTaskIdSpleeter(data.task_id);
+  } catch (error) {
+    alert("Spleeter 분리 요청 오류: " + error.message);
+    setSeparationLoadingSpleeter(false);
+  }
+};
 
   return (
     <>
@@ -308,7 +312,7 @@ export default function Download() {
               <Button
                 variant="contained"
                 onClick={processAudioSpleeter}
-                disabled={separationLoadingSpleeter}
+                disabled={separationLoadingSpleeter || separationLoadingDemucs} // ✅ 둘 다 체크
                 sx={{ flex: 1, whiteSpace: "nowrap", fontSize: "0.875rem", display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 {separationLoadingSpleeter ? (
@@ -325,7 +329,7 @@ export default function Download() {
               <Button
                 variant="contained"
                 onClick={processAudioDemucs}
-                disabled={separationLoadingDemucs}
+                disabled={separationLoadingDemucs || separationLoadingSpleeter} // ✅ 둘 다 체크
                 sx={{ flex: 1, whiteSpace: "nowrap", fontSize: "0.875rem", display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 {separationLoadingDemucs ? (
