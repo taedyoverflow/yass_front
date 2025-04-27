@@ -189,7 +189,7 @@ export default function TTS() {
           >
             {(loading || polling) ? (
               <>
-                <CircularProgress size={20} sx={{ mr: 1 }} />
+                {/* <CircularProgress size={20} sx={{ mr: 1 }} /> */}
                 Generating...
               </>
             ) : (

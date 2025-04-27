@@ -40,26 +40,28 @@ export default function BasicPitch() {
   const handleUpload = async () => {
     if (!selectedFile) return;
     setLoading(true);
+    setEstimatedTimeLeft(100);  // ✅ 여기서 바로 카운트다운 시작
     setMidiUrl("");
     setSheetUrl("");
     setBpm(null);
     const formData = new FormData();
     formData.append("file", selectedFile);
-
+  
     try {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/convert_midi/`, {
         method: "POST",
         body: formData,
       });
-
+  
       const data = await res.json();
       setTaskId(data.task_id);
     } catch (err) {
       console.error("❌ 업로드 실패:", err);
       alert("서버 오류 또는 네트워크 문제로 업로드에 실패했습니다.");
       setLoading(false);
+      setEstimatedTimeLeft(null);  // 실패했으면 카운트다운도 초기화
     }
-  };
+  };  
 
   const checkResult = useCallback(async () => {
     if (!taskId) return;
@@ -177,7 +179,7 @@ export default function BasicPitch() {
             >
               {loading ? (
                 <>
-                  <CircularProgress size={20} sx={{ mr: 1 }} />
+                  {/* <CircularProgress size={20} sx={{ mr: 1 }} /> */}
                   Converting... {estimatedTimeLeft !== null && `(${estimatedTimeLeft}s left)`}
                 </>
               ) : (

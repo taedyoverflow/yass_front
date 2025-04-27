@@ -185,15 +185,16 @@ export default function Download() {
     }
   };
 
-// processAudioDemucs 안에 추가
+// Demucs
 const processAudioDemucs = async () => {
   if (!youtubeUrl.trim()) { alert("YouTube URL을 입력해주세요."); return; }
+  
   setSeparationLoadingDemucs(true);
+  setEstimatedTimeLeftDemucs(200); // ✅ 버튼 누르자마자 200초 시작
   setVocalBlobUrlDemucs("");
   setDrumsBlobUrl("");
   setBassBlobUrl("");
   setOtherBlobUrl("");
-  setEstimatedTimeLeftDemucs(200); // ✅ 추가
 
   try {
     const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio_demucs/`, {
@@ -206,16 +207,18 @@ const processAudioDemucs = async () => {
   } catch (error) {
     alert("Demucs 분리 요청 오류: " + error.message);
     setSeparationLoadingDemucs(false);
+    setEstimatedTimeLeftDemucs(null); // 실패했으면 초기화
   }
 };
 
-// processAudioSpleeter 안에 추가
+// Spleeter
 const processAudioSpleeter = async () => {
   if (!youtubeUrl.trim()) { alert("YouTube URL을 입력해주세요."); return; }
+  
   setSeparationLoadingSpleeter(true);
+  setEstimatedTimeLeftSpleeter(100); // ✅ 버튼 누르자마자 100초 시작
   setVocalBlobUrlSpleeter("");
   setAccompBlobUrl("");
-  setEstimatedTimeLeftSpleeter(100); // ✅ 추가
 
   try {
     const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio/`, {
@@ -228,6 +231,7 @@ const processAudioSpleeter = async () => {
   } catch (error) {
     alert("Spleeter 분리 요청 오류: " + error.message);
     setSeparationLoadingSpleeter(false);
+    setEstimatedTimeLeftSpleeter(null); // 실패했으면 초기화
   }
 };
 
@@ -346,7 +350,7 @@ const processAudioSpleeter = async () => {
               >
                 {separationLoadingSpleeter ? (
                   <>
-                    <CircularProgress size={16} sx={{ mr: 1 }} /> {/* ⬅️ 추가 ✅ */}
+                    {/* <CircularProgress size={16} sx={{ mr: 1 }} /> */}
                     Spleeter...
                     {estimatedTimeLeftSpleeter !== null && ` (${estimatedTimeLeftSpleeter}s left)`}
                   </>
@@ -364,7 +368,7 @@ const processAudioSpleeter = async () => {
               >
                 {separationLoadingDemucs ? (
                   <>
-                    <CircularProgress size={16} sx={{ mr: 1 }} /> {/* ⬅️ 추가 ✅ */}
+                    {/* <CircularProgress size={16} sx={{ mr: 1 }} /> */}
                     Demucs...
                     {estimatedTimeLeftDemucs !== null && ` (${estimatedTimeLeftDemucs}s left)`}
                   </>
