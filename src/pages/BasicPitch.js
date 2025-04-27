@@ -175,7 +175,7 @@ export default function BasicPitch() {
               color="primary"
               onClick={handleUpload}
               disabled={loading || !selectedFile}
-              sx={{ width: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              sx={{ width: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap' }}
             >
               {loading ? (
                 <>

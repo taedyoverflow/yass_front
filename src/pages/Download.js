@@ -56,6 +56,9 @@ export default function Download() {
   const [estimatedTimeLeftDemucs, setEstimatedTimeLeftDemucs] = useState(null);
   const [estimatedTimeLeftSpleeter, setEstimatedTimeLeftSpleeter] = useState(null);
 
+  const countdownRefDemucs = useRef(null);
+  const countdownRefSpleeter = useRef(null);
+
   const checkResultDemucs = useCallback(async () => {
     if (!taskIdDemucs) return;
     try {
@@ -90,61 +93,48 @@ export default function Download() {
 
   useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); }, [page]);
 
-  // ✅ ✅ ✅ [Spleeter 타이머+폴링 리팩토링] ✅ ✅ ✅
-  useEffect(() => {
-    let intervalCheck = null;
-    let intervalCountdown = null;
-    let retryCount = 0;
+// 🎯 수정: useEffect에서 카운트다운 제거 (폴링만 유지)
+useEffect(() => {
+  let intervalCheck = null;
+  let retryCount = 0;
 
-    if (separationLoadingSpleeter && taskIdSpleeter) {
-      setEstimatedTimeLeftSpleeter(100);
-      intervalCountdown = setInterval(() => {
-        setEstimatedTimeLeftSpleeter(prev => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
+  if (separationLoadingSpleeter && taskIdSpleeter) {
+    intervalCheck = setInterval(() => {
+      retryCount += 1;
+      if (retryCount >= 20) { // 100초
+        setSeparationLoadingSpleeter(false);
+        alert("작업이 예상보다 오래 걸리고 있어요. 다시 시도해보거나 잠시 후 재시도해주세요.");
+        clearInterval(intervalCheck);
+        clearInterval(countdownRefSpleeter.current); // 🔥 여기서 타이머도 같이 정리
+        return;
+      }
+      checkResultSpleeter();
+    }, 5000);
+  }
 
-      intervalCheck = setInterval(() => {
-        retryCount += 1;
-        if (retryCount >= 20) { // 100초(5초 * 20)
-          setSeparationLoadingSpleeter(false);
-          alert("작업이 예상보다 오래 걸리고 있어요. 다시 시도해보거나 잠시 후 재시도해주세요.");
-          clearInterval(intervalCheck);
-          clearInterval(intervalCountdown);
-          return;
-        }
-        checkResultSpleeter();
-      }, 5000);
-    }
+  return () => clearInterval(intervalCheck);
+}, [separationLoadingSpleeter, taskIdSpleeter, checkResultSpleeter]);
 
-    return () => { clearInterval(intervalCheck); clearInterval(intervalCountdown); };
-  }, [separationLoadingSpleeter, taskIdSpleeter, checkResultSpleeter]);
+useEffect(() => {
+  let intervalCheck = null;
+  let retryCount = 0;
 
-  // ✅ ✅ ✅ [Demucs 타이머+폴링 리팩토링] ✅ ✅ ✅
-  useEffect(() => {
-    let intervalCheck = null;
-    let intervalCountdown = null;
-    let retryCount = 0;
+  if (separationLoadingDemucs && taskIdDemucs) {
+    intervalCheck = setInterval(() => {
+      retryCount += 1;
+      if (retryCount >= 40) { // 200초
+        setSeparationLoadingDemucs(false);
+        alert("작업이 예상보다 오래 걸리고 있어요. 다시 시도해보거나 잠시 후 재시도해주세요.");
+        clearInterval(intervalCheck);
+        clearInterval(countdownRefDemucs.current); // 🔥 여기서 타이머도 같이 정리
+        return;
+      }
+      checkResultDemucs();
+    }, 5000);
+  }
 
-    if (separationLoadingDemucs && taskIdDemucs) {
-      setEstimatedTimeLeftDemucs(200);
-      intervalCountdown = setInterval(() => {
-        setEstimatedTimeLeftDemucs(prev => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
-
-      intervalCheck = setInterval(() => {
-        retryCount += 1;
-        if (retryCount >= 40) { // 200초(5초 * 40)
-          setSeparationLoadingDemucs(false);
-          alert("작업이 예상보다 오래 걸리고 있어요. 다시 시도해보거나 잠시 후 재시도해주세요.");
-          clearInterval(intervalCheck);
-          clearInterval(intervalCountdown);
-          return;
-        }
-        checkResultDemucs();
-      }, 5000);
-    }
-
-    return () => { clearInterval(intervalCheck); clearInterval(intervalCountdown); };
-  }, [separationLoadingDemucs, taskIdDemucs, checkResultDemucs]);
+  return () => clearInterval(intervalCheck);
+}, [separationLoadingDemucs, taskIdDemucs, checkResultDemucs]);
 
   const searchVideos = async () => {
     setSearchLoading(true);
@@ -190,11 +180,17 @@ const processAudioDemucs = async () => {
   if (!youtubeUrl.trim()) { alert("YouTube URL을 입력해주세요."); return; }
   
   setSeparationLoadingDemucs(true);
-  setEstimatedTimeLeftDemucs(200); // ✅ 버튼 누르자마자 200초 시작
+  setEstimatedTimeLeftDemucs(200);
   setVocalBlobUrlDemucs("");
   setDrumsBlobUrl("");
   setBassBlobUrl("");
   setOtherBlobUrl("");
+
+  // ✅ 버튼 누르자마자 카운트다운 시작
+  clearInterval(countdownRefDemucs.current);
+  countdownRefDemucs.current = setInterval(() => {
+    setEstimatedTimeLeftDemucs(prev => (prev > 0 ? prev - 1 : 0));
+  }, 1000);
 
   try {
     const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio_demucs/`, {
@@ -207,7 +203,8 @@ const processAudioDemucs = async () => {
   } catch (error) {
     alert("Demucs 분리 요청 오류: " + error.message);
     setSeparationLoadingDemucs(false);
-    setEstimatedTimeLeftDemucs(null); // 실패했으면 초기화
+    setEstimatedTimeLeftDemucs(null);
+    clearInterval(countdownRefDemucs.current); // 실패 시 타이머 정리
   }
 };
 
@@ -216,9 +213,15 @@ const processAudioSpleeter = async () => {
   if (!youtubeUrl.trim()) { alert("YouTube URL을 입력해주세요."); return; }
   
   setSeparationLoadingSpleeter(true);
-  setEstimatedTimeLeftSpleeter(100); // ✅ 버튼 누르자마자 100초 시작
+  setEstimatedTimeLeftSpleeter(100);
   setVocalBlobUrlSpleeter("");
   setAccompBlobUrl("");
+
+  // ✅ 버튼 누르자마자 카운트다운 시작
+  clearInterval(countdownRefSpleeter.current);
+  countdownRefSpleeter.current = setInterval(() => {
+    setEstimatedTimeLeftSpleeter(prev => (prev > 0 ? prev - 1 : 0));
+  }, 1000);
 
   try {
     const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/process_audio/`, {
@@ -231,7 +234,8 @@ const processAudioSpleeter = async () => {
   } catch (error) {
     alert("Spleeter 분리 요청 오류: " + error.message);
     setSeparationLoadingSpleeter(false);
-    setEstimatedTimeLeftSpleeter(null); // 실패했으면 초기화
+    setEstimatedTimeLeftSpleeter(null);
+    clearInterval(countdownRefSpleeter.current); // 실패 시 타이머 정리
   }
 };
 
