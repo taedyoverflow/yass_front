@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // import Produce from "./pages/Produce";
 // import Separation from "./pages/Separation";
 // import Inference from "./pages/Inference";
-// import Train from "./pages/Train";
+import DJing from "./pages/DJing";
 import TTS from "./pages/TTS";
 import Download from "./pages/Download"
 
@@ -28,7 +28,7 @@ function App() {
           {/* <Route path="/signin" element={<SignIn />} /> */}
           {/* <Route path="/" element={<Home />} /> */}
           {/* <Route path="/separation" element={<Separation />} /> */}
-          {/* <Route path="/inference" element={<Inference />} /> */}
+          <Route path="/djing" element={<DJing />} />
           <Route path="/pitch" element={<BasicPitch />} /> */
           <Route path="/tts" element={<TTS />} />
           <Route path="/" element={<Download />} />

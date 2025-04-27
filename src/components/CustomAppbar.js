@@ -37,6 +37,9 @@ function CustomAppBar() {
         <ListItem button component="a" href="/pitch">
           <ListItemText primary="BasicPitch" />
         </ListItem>
+        <ListItem button component="a" href="/djing">
+          <ListItemText primary="GrooVAE" />
+        </ListItem>
       </List>
     </Box>
   );
@@ -64,11 +67,11 @@ function CustomAppBar() {
           <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'flex-end' }}>
             {/* <Button href="/" color="inherit">HOME</Button>
             <Button href="/separation" color="inherit">SEPARATION</Button>
-            <Button href="/inference" color="inherit">INFERENCE</Button>
-            <Button href="/train" color="inherit">TRAIN</Button> */}
+            <Button href="/inference" color="inherit">INFERENCE</Button>*/}
             <Button href="/" color="inherit">Spleeter / Demucs</Button>
             <Button href="/tts" color="inherit">edgeTTS</Button>
             <Button href="/pitch" color="inherit">BasicPitch</Button>
+            <Button href="/djing" color="inherit">GrooVAE</Button> 
           </Box>
         )}
       </Toolbar>
