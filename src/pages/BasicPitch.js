@@ -43,7 +43,6 @@ export default function BasicPitch() {
     setMidiUrl("");
     setSheetUrl("");
     setBpm(null);
-    setEstimatedTimeLeft(100);
     const formData = new FormData();
     formData.append("file", selectedFile);
 
@@ -80,7 +79,7 @@ export default function BasicPitch() {
         setLoading(false);
         setTaskId(null);
         setEstimatedTimeLeft(null);
-        alert(data.reason || "MIDI 변환 실패. 다시 시도해주세요."); // ✅ reason을 읽어오게 수정
+        alert(data.reason || "MIDI 변환 실패. 다시 시도해주세요.");
       }
       
     } catch (err) {
@@ -93,13 +92,35 @@ export default function BasicPitch() {
   }, [taskId]);
 
   useEffect(() => {
-    let interval;
+    let intervalCheck = null;
+    let intervalCountdown = null;
+    let retryCount = 0;
+
     if (taskId) {
-      interval = setInterval(() => {
+      setEstimatedTimeLeft(100);
+      intervalCountdown = setInterval(() => {
+        setEstimatedTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+
+      intervalCheck = setInterval(() => {
+        retryCount += 1;
+        if (retryCount >= 20) {
+          setLoading(false);
+          setTaskId(null);
+          setEstimatedTimeLeft(null);
+          alert("작업이 예상보다 오래 걸리고 있어요. 다시 시도해보거나 잠시 후 재시도해주세요."); // ✅ 수정 완료
+          clearInterval(intervalCheck);
+          clearInterval(intervalCountdown);
+          return;
+        }
         checkResult();
-      }, 5000); // 5초에 한번 폴링
+      }, 5000);
     }
-    return () => clearInterval(interval);
+
+    return () => {
+      clearInterval(intervalCheck);
+      clearInterval(intervalCountdown);
+    };
   }, [taskId, checkResult]);
 
   useEffect(() => {
@@ -120,7 +141,7 @@ export default function BasicPitch() {
         <Container sx={{ py: 8 }} maxWidth="md">
           <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 2 }}>
             Beta 서비스 안내: <br />
-            블레이 서비스 중에는 악보의 정확성을 보장할 수 없습니다. <br />
+            베타 서비스 중에는 악보의 정확성을 보장할 수 없습니다. <br />
             지속적으로 고도화 및 유지보수 중입니다.<br/><br />
           </Typography>
           <Typography variant="h4" align="center" gutterBottom>
@@ -167,8 +188,12 @@ export default function BasicPitch() {
 
           {(midiUrl || sheetUrl) && (
             <Box mt={6} textAlign="center">
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                변환된 미디파일과 악보는 최대 5분 동안 다운로드 가능합니다.
+              </Typography>
+
               {midiUrl && (
-                <Box>
+                <Box sx={{ mt: 3 }}>
                   <Typography variant="h6" gutterBottom>MIDI 파일 다운로드</Typography>
                   <Link href={midiUrl} download target="_blank" rel="noopener">
                     <Button variant="outlined">MIDI 다운로드</Button>
@@ -183,7 +208,7 @@ export default function BasicPitch() {
               )}
 
               {sheetUrl && (
-                <Box mt={4}>
+                <Box sx={{ mt: 4 }}>
                   <Typography variant="h6" gutterBottom>악보 미리보기</Typography>
                   <iframe
                     src={sheetUrl}

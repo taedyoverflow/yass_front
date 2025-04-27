@@ -90,33 +90,61 @@ export default function Download() {
 
   useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); }, [page]);
 
+  // ✅ ✅ ✅ [Spleeter 타이머+폴링 리팩토링] ✅ ✅ ✅
   useEffect(() => {
     let intervalCheck = null;
     let intervalCountdown = null;
-
-    if (separationLoadingDemucs && taskIdDemucs) {
-      intervalCountdown = setInterval(() => {
-        setEstimatedTimeLeftDemucs(prev => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
-      intervalCheck = setInterval(checkResultDemucs, 5000);
-    }
-
-    return () => { clearInterval(intervalCheck); clearInterval(intervalCountdown); };
-  }, [separationLoadingDemucs, taskIdDemucs, checkResultDemucs]);
-
-  useEffect(() => {
-    let intervalCheck = null;
-    let intervalCountdown = null;
+    let retryCount = 0;
 
     if (separationLoadingSpleeter && taskIdSpleeter) {
+      setEstimatedTimeLeftSpleeter(100);
       intervalCountdown = setInterval(() => {
         setEstimatedTimeLeftSpleeter(prev => (prev > 0 ? prev - 1 : 0));
       }, 1000);
-      intervalCheck = setInterval(checkResultSpleeter, 5000);
+
+      intervalCheck = setInterval(() => {
+        retryCount += 1;
+        if (retryCount >= 20) { // 100초(5초 * 20)
+          setSeparationLoadingSpleeter(false);
+          alert("작업이 예상보다 오래 걸리고 있어요. 다시 시도해보거나 잠시 후 재시도해주세요.");
+          clearInterval(intervalCheck);
+          clearInterval(intervalCountdown);
+          return;
+        }
+        checkResultSpleeter();
+      }, 5000);
     }
 
     return () => { clearInterval(intervalCheck); clearInterval(intervalCountdown); };
   }, [separationLoadingSpleeter, taskIdSpleeter, checkResultSpleeter]);
+
+  // ✅ ✅ ✅ [Demucs 타이머+폴링 리팩토링] ✅ ✅ ✅
+  useEffect(() => {
+    let intervalCheck = null;
+    let intervalCountdown = null;
+    let retryCount = 0;
+
+    if (separationLoadingDemucs && taskIdDemucs) {
+      setEstimatedTimeLeftDemucs(200);
+      intervalCountdown = setInterval(() => {
+        setEstimatedTimeLeftDemucs(prev => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+
+      intervalCheck = setInterval(() => {
+        retryCount += 1;
+        if (retryCount >= 40) { // 200초(5초 * 40)
+          setSeparationLoadingDemucs(false);
+          alert("작업이 예상보다 오래 걸리고 있어요. 다시 시도해보거나 잠시 후 재시도해주세요.");
+          clearInterval(intervalCheck);
+          clearInterval(intervalCountdown);
+          return;
+        }
+        checkResultDemucs();
+      }, 5000);
+    }
+
+    return () => { clearInterval(intervalCheck); clearInterval(intervalCountdown); };
+  }, [separationLoadingDemucs, taskIdDemucs, checkResultDemucs]);
 
   const searchVideos = async () => {
     setSearchLoading(true);
