@@ -156,7 +156,7 @@ export default function BasicPitch() {
 
           <Typography variant="body1" align="center" sx={{ mb: 4 }}>
             반주 오디오 파일(WAV)을 MIDI로 변환하여 다운로드하거나,<br />
-            악보로 미리보기를 할 수 있습니다.
+            악보로 확인해 보세요.
           </Typography>
 
           <Box sx={{ mt: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -217,7 +217,7 @@ export default function BasicPitch() {
 
               {sheetUrl && (
                 <Box sx={{ mt: 4 }}>
-                  <Typography variant="h6" gutterBottom>Sheet Music Preview</Typography>
+                  <Typography variant="h6" gutterBottom>악보 미리보기</Typography>
                   <iframe
                     src={sheetUrl}
                     width="100%"
