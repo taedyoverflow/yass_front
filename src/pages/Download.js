@@ -9,7 +9,6 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Link from "@mui/material/Link";
-import CircularProgress from "@mui/material/CircularProgress";
 import CustomAppBar from "../components/CustomAppbar";
 
 function Copyright() {

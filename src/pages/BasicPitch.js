@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  Container, Typography, Box, Button, CircularProgress, Link
+  Container, Typography, Box, Button, Link
 } from "@mui/material";
 import CustomAppBar from "../components/CustomAppbar";
 
@@ -40,7 +40,7 @@ export default function BasicPitch() {
   const handleUpload = async () => {
     if (!selectedFile) return;
     setLoading(true);
-    setEstimatedTimeLeft(100);  // ✅ 여기서 바로 카운트다운 시작
+    setEstimatedTimeLeft(200);
     setMidiUrl("");
     setSheetUrl("");
     setBpm(null);
@@ -99,14 +99,14 @@ export default function BasicPitch() {
     let retryCount = 0;
 
     if (taskId) {
-      setEstimatedTimeLeft(100);
+      setEstimatedTimeLeft(200);
       intervalCountdown = setInterval(() => {
         setEstimatedTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
       }, 1000);
 
       intervalCheck = setInterval(() => {
         retryCount += 1;
-        if (retryCount >= 20) {
+        if (retryCount >= 40) {
           setLoading(false);
           setTaskId(null);
           setEstimatedTimeLeft(null);
