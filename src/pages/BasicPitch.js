@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Container, Typography, Box, Button, Link
 } from "@mui/material";
@@ -24,6 +24,10 @@ export default function BasicPitch() {
   const [bpm, setBpm] = useState(null);
   const [estimatedTimeLeft, setEstimatedTimeLeft] = useState(null);
 
+  const intervalCheckRef = useRef(null);
+  const intervalCountdownRef = useRef(null);
+  const retryCountRef = useRef(0);
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -40,28 +44,30 @@ export default function BasicPitch() {
   const handleUpload = async () => {
     if (!selectedFile) return;
     setLoading(true);
-    setEstimatedTimeLeft(200);
+    setEstimatedTimeLeft(300); // 300초로 설정
     setMidiUrl("");
     setSheetUrl("");
     setBpm(null);
+    retryCountRef.current = 0;
+
     const formData = new FormData();
     formData.append("file", selectedFile);
-  
+
     try {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/convert_midi/`, {
         method: "POST",
         body: formData,
       });
-  
+
       const data = await res.json();
       setTaskId(data.task_id);
     } catch (err) {
       console.error("❌ 업로드 실패:", err);
       alert("서버 오류 또는 네트워크 문제로 업로드에 실패했습니다.");
       setLoading(false);
-      setEstimatedTimeLeft(null);  // 실패했으면 카운트다운도 초기화
+      setEstimatedTimeLeft(null);
     }
-  };  
+  };
 
   const checkResult = useCallback(async () => {
     if (!taskId) return;
@@ -77,42 +83,47 @@ export default function BasicPitch() {
         setLoading(false);
         setTaskId(null);
         setEstimatedTimeLeft(null);
+        clearIntervals();
       } else if (data.status === "FAILURE") {
         setLoading(false);
         setTaskId(null);
         setEstimatedTimeLeft(null);
+        clearIntervals();
         alert(data.reason || "MIDI 변환 실패. 다시 시도해주세요.");
       }
       
     } catch (err) {
       console.error("❌ 결과 확인 실패:", err);
-      alert("서버 응답 오류. 다시 시도해주세요.");
       setLoading(false);
       setTaskId(null);
       setEstimatedTimeLeft(null);
+      clearIntervals();
+      alert("서버 응답 오류. 다시 시도해주세요.");
     }
   }, [taskId]);
 
-  useEffect(() => {
-    let intervalCheck = null;
-    let intervalCountdown = null;
-    let retryCount = 0;
+  const clearIntervals = () => {
+    if (intervalCheckRef.current) clearInterval(intervalCheckRef.current);
+    if (intervalCountdownRef.current) clearInterval(intervalCountdownRef.current);
+  };
 
+  useEffect(() => {
     if (taskId) {
-      setEstimatedTimeLeft(200);
-      intervalCountdown = setInterval(() => {
+      setEstimatedTimeLeft(300); // 5분
+      retryCountRef.current = 0;
+
+      intervalCountdownRef.current = setInterval(() => {
         setEstimatedTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
       }, 1000);
 
-      intervalCheck = setInterval(() => {
-        retryCount += 1;
-        if (retryCount >= 40) {
+      intervalCheckRef.current = setInterval(() => {
+        retryCountRef.current += 1;
+        if (retryCountRef.current >= 60) { // 5초 간격 × 60번 = 300초
           setLoading(false);
           setTaskId(null);
           setEstimatedTimeLeft(null);
-          alert("작업이 예상보다 오래 걸리고 있어요. 다시 시도해보거나 잠시 후 재시도해주세요."); // ✅ 수정 완료
-          clearInterval(intervalCheck);
-          clearInterval(intervalCountdown);
+          clearIntervals();
+          alert("작업이 예상보다 오래 걸리고 있습니다. 잠시 후 다시 시도해주세요.");
           return;
         }
         checkResult();
@@ -120,20 +131,9 @@ export default function BasicPitch() {
     }
 
     return () => {
-      clearInterval(intervalCheck);
-      clearInterval(intervalCountdown);
+      clearIntervals();
     };
   }, [taskId, checkResult]);
-
-  useEffect(() => {
-    let countdown;
-    if (loading && estimatedTimeLeft !== null) {
-      countdown = setInterval(() => {
-        setEstimatedTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
-    }
-    return () => clearInterval(countdown);
-  }, [loading, estimatedTimeLeft]);
 
   return (
     <>
@@ -143,15 +143,17 @@ export default function BasicPitch() {
         <Container sx={{ py: 8 }} maxWidth="md">
           <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 2 }}>
             Beta 서비스 안내: <br />
-            베타 서비스 중에는 악보의 정확성을 보장할 수 없습니다. <br />
-            지속적으로 고도화 및 유지보수 중입니다.<br/><br />
+            현재 변환 정확도가 완벽하지 않을 수 있습니다. <br />
+            지속적으로 개선 및 유지보수 중입니다.<br/><br />
           </Typography>
+
           <Typography variant="h4" align="center" gutterBottom>
             Audio to MIDI AI
           </Typography>
+
           <Typography variant="body1" align="center" sx={{ mb: 4 }}>
-            반주 오디오 파일(wav)을 MIDI로 변환해서 다운로드하거나,<br />
-            악보로 확인해 보세요.
+            반주 오디오 파일(WAV)을 MIDI로 변환하여 다운로드하거나,<br />
+            악보로 미리보기를 할 수 있습니다.
           </Typography>
 
           <Box sx={{ mt: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -167,9 +169,11 @@ export default function BasicPitch() {
                 onChange={handleFileChange}
               />
             </Button>
+
             <Typography variant="body2" sx={{ mb: 2 }}>
               {selectedFile ? selectedFile.name : "선택된 파일 없음"}
             </Typography>
+
             <Button
               variant="contained"
               color="primary"
@@ -179,11 +183,10 @@ export default function BasicPitch() {
             >
               {loading ? (
                 <>
-                  {/* <CircularProgress size={20} sx={{ mr: 1 }} /> */}
-                  Converting... {estimatedTimeLeft !== null && `(${estimatedTimeLeft}s left)`}
+                  변환 중... {estimatedTimeLeft !== null && `(${estimatedTimeLeft}s 남음)`}
                 </>
               ) : (
-                "Upload & Convert"
+                "업로드 및 변환 시작"
               )}
             </Button>
           </Box>
@@ -191,7 +194,7 @@ export default function BasicPitch() {
           {(midiUrl || sheetUrl) && (
             <Box mt={6} textAlign="center">
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                변환된 미디파일과 악보는 최대 5분 동안 다운로드 가능합니다.
+                변환된 파일은 최대 5분 동안 다운로드 가능합니다.
               </Typography>
 
               {midiUrl && (
@@ -242,8 +245,8 @@ export default function BasicPitch() {
           sx={{ fontSize: "0.875rem" }}
         >
           This service uses <strong>Basic Pitch</strong> for audio-to-MIDI conversion.<br />
-          Basic Pitch is an open-source audio-to-MIDI conversion tool developed by Spotify.<br />
-          It is powered by Spotify’s neural pitch detection model via a Python implementation.<br />
+          Basic Pitch is an open-source tool developed by Spotify.<br />
+          Powered by Spotify’s neural pitch detection model (Python implementation).<br />
           The tool 'basic-pitch' is released under the MIT License.<br /><br />
           Contact: taedyoverflow@gmail.com
         </Typography>
