@@ -41,10 +41,22 @@ export default function BasicPitch() {
     setSelectedFile(file);
   };
 
+  const clearIntervals = () => {
+    if (intervalCheckRef.current) clearInterval(intervalCheckRef.current);
+    if (intervalCountdownRef.current) clearInterval(intervalCountdownRef.current);
+  };
+
   const handleUpload = async () => {
     if (!selectedFile) return;
     setLoading(true);
-    setEstimatedTimeLeft(300); // 300초로 설정
+    setEstimatedTimeLeft(300); // 300초
+
+    // ✅ 버튼 누르자마자 카운트다운 시작
+    clearInterval(intervalCountdownRef.current);
+    intervalCountdownRef.current = setInterval(() => {
+      setEstimatedTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
     setMidiUrl("");
     setSheetUrl("");
     setBpm(null);
@@ -63,9 +75,10 @@ export default function BasicPitch() {
       setTaskId(data.task_id);
     } catch (err) {
       console.error("❌ 업로드 실패:", err);
-      alert("서버 오류 또는 네트워크 문제로 업로드에 실패했습니다.");
+      alert("Upload failed due to server error or network problem.");
       setLoading(false);
       setEstimatedTimeLeft(null);
+      clearIntervals(); // 실패 시 타이머 정리
     }
   };
 
@@ -102,19 +115,9 @@ export default function BasicPitch() {
     }
   }, [taskId]);
 
-  const clearIntervals = () => {
-    if (intervalCheckRef.current) clearInterval(intervalCheckRef.current);
-    if (intervalCountdownRef.current) clearInterval(intervalCountdownRef.current);
-  };
-
   useEffect(() => {
     if (taskId) {
-      setEstimatedTimeLeft(300); // 5분
       retryCountRef.current = 0;
-
-      intervalCountdownRef.current = setInterval(() => {
-        setEstimatedTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-      }, 1000);
 
       intervalCheckRef.current = setInterval(() => {
         retryCountRef.current += 1;
@@ -123,7 +126,7 @@ export default function BasicPitch() {
           setTaskId(null);
           setEstimatedTimeLeft(null);
           clearIntervals();
-          alert("작업이 예상보다 오래 걸리고 있습니다. 잠시 후 다시 시도해주세요.");
+          alert("The task is taking longer than expected. Please try again later.");
           return;
         }
         checkResult();
@@ -162,7 +165,7 @@ export default function BasicPitch() {
               component="label"
               sx={{ mb: 2 }}
             >
-              파일 선택
+              Upload File
               <input
                 type="file"
                 hidden
@@ -171,7 +174,7 @@ export default function BasicPitch() {
             </Button>
 
             <Typography variant="body2" sx={{ mb: 2 }}>
-              {selectedFile ? selectedFile.name : "선택된 파일 없음"}
+              {selectedFile ? selectedFile.name : "No file selected"}
             </Typography>
 
             <Button
@@ -183,10 +186,10 @@ export default function BasicPitch() {
             >
               {loading ? (
                 <>
-                  변환 중... {estimatedTimeLeft !== null && `(${estimatedTimeLeft}s 남음)`}
+                  Converting... {estimatedTimeLeft !== null && `(${estimatedTimeLeft}s left)`}
                 </>
               ) : (
-                "업로드 및 변환 시작"
+                "Upload & Convert"
               )}
             </Button>
           </Box>
@@ -201,25 +204,25 @@ export default function BasicPitch() {
                 <Box sx={{ mt: 3 }}>
                   <Typography variant="h6" gutterBottom>MIDI 파일 다운로드</Typography>
                   <Link href={midiUrl} download target="_blank" rel="noopener">
-                    <Button variant="outlined">MIDI 다운로드</Button>
+                    <Button variant="outlined">Download MIDI</Button>
                   </Link>
                 </Box>
               )}
 
               {bpm && (
                 <Typography variant="body1" sx={{ mt: 3 }}>
-                  추정 BPM: <strong>{bpm}</strong>
+                  Estimated BPM: <strong>{bpm}</strong>
                 </Typography>
               )}
 
               {sheetUrl && (
                 <Box sx={{ mt: 4 }}>
-                  <Typography variant="h6" gutterBottom>악보 미리보기</Typography>
+                  <Typography variant="h6" gutterBottom>Sheet Music Preview</Typography>
                   <iframe
                     src={sheetUrl}
                     width="100%"
                     height="600px"
-                    title="악보 PDF 미리보기"
+                    title="Sheet PDF Preview"
                     style={{ border: "1px solid #ccc" }}
                   />
                   <Button
@@ -228,7 +231,7 @@ export default function BasicPitch() {
                     href={sheetUrl}
                     download
                   >
-                    악보 PDF 다운로드
+                    Download Sheet PDF
                   </Button>
                 </Box>
               )}
