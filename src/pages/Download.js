@@ -313,12 +313,12 @@ const processAudioSpleeter = async () => {
               <Button
                 variant="contained"
                 onClick={processAudioSpleeter}
-                disabled={separationLoadingSpleeter || separationLoadingDemucs} // ✅ 둘 다 체크
+                disabled={separationLoadingSpleeter || separationLoadingDemucs}
                 sx={{ flex: 1, whiteSpace: "nowrap", fontSize: "0.875rem", display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 {separationLoadingSpleeter ? (
                   <>
-                    <CircularProgress size={16} sx={{ mr: 1 }} />
+                    <CircularProgress size={16} sx={{ mr: 1 }} /> {/* ⬅️ 추가 ✅ */}
                     Spleeter...
                     {estimatedTimeLeftSpleeter !== null && ` (${estimatedTimeLeftSpleeter}s left)`}
                   </>
@@ -326,16 +326,17 @@ const processAudioSpleeter = async () => {
                   "Spleeter (2 Track)"
                 )}
               </Button>
+
   
               <Button
                 variant="contained"
                 onClick={processAudioDemucs}
-                disabled={separationLoadingDemucs || separationLoadingSpleeter} // ✅ 둘 다 체크
+                disabled={separationLoadingDemucs || separationLoadingSpleeter}
                 sx={{ flex: 1, whiteSpace: "nowrap", fontSize: "0.875rem", display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 {separationLoadingDemucs ? (
                   <>
-                    <CircularProgress size={16} sx={{ mr: 1 }} />
+                    <CircularProgress size={16} sx={{ mr: 1 }} /> {/* ⬅️ 추가 ✅ */}
                     Demucs...
                     {estimatedTimeLeftDemucs !== null && ` (${estimatedTimeLeftDemucs}s left)`}
                   </>
@@ -343,6 +344,7 @@ const processAudioSpleeter = async () => {
                   "Demucs (4 Track)"
                 )}
               </Button>
+
             </Box>
           </Box>
   

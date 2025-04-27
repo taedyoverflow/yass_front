@@ -22,6 +22,7 @@ export default function BasicPitch() {
   const [sheetUrl, setSheetUrl] = useState("");
   const [taskId, setTaskId] = useState(null);
   const [bpm, setBpm] = useState(null);
+  const [estimatedTimeLeft, setEstimatedTimeLeft] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -42,6 +43,7 @@ export default function BasicPitch() {
     setMidiUrl("");
     setSheetUrl("");
     setBpm(null);
+    setEstimatedTimeLeft(100);
     const formData = new FormData();
     formData.append("file", selectedFile);
 
@@ -73,16 +75,20 @@ export default function BasicPitch() {
         setBpm(data.bpm || null);
         setLoading(false);
         setTaskId(null);
+        setEstimatedTimeLeft(null);
       } else if (data.status === "FAILURE") {
         setLoading(false);
         setTaskId(null);
-        alert("MIDI 변환 실패. 다시 시도해주세요.");
+        setEstimatedTimeLeft(null);
+        alert(data.reason || "MIDI 변환 실패. 다시 시도해주세요."); // ✅ reason을 읽어오게 수정
       }
+      
     } catch (err) {
       console.error("❌ 결과 확인 실패:", err);
       alert("서버 응답 오류. 다시 시도해주세요.");
       setLoading(false);
       setTaskId(null);
+      setEstimatedTimeLeft(null);
     }
   }, [taskId]);
 
@@ -91,10 +97,20 @@ export default function BasicPitch() {
     if (taskId) {
       interval = setInterval(() => {
         checkResult();
-      }, 3000);
+      }, 5000); // 5초에 한번 폴링
     }
     return () => clearInterval(interval);
   }, [taskId, checkResult]);
+
+  useEffect(() => {
+    let countdown;
+    if (loading && estimatedTimeLeft !== null) {
+      countdown = setInterval(() => {
+        setEstimatedTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => clearInterval(countdown);
+  }, [loading, estimatedTimeLeft]);
 
   return (
     <>
@@ -102,21 +118,16 @@ export default function BasicPitch() {
 
       <main style={{ position: "relative" }}>
         <Container sx={{ py: 8 }} maxWidth="md">
-        <Typography
-          variant="body1"
-          align="center"
-          color="text.secondary"
-          sx={{ mb: 2 }}
-        >
-          Beta 서비스 안내: <br />
-          베타 서비스 중에는 악보의 정확성을 보장할 수 없습니다. <br />
-          지속적으로 고도화 및 유지보수 중입니다.<br/><br />
-        </Typography>
+          <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 2 }}>
+            Beta 서비스 안내: <br />
+            블레이 서비스 중에는 악보의 정확성을 보장할 수 없습니다. <br />
+            지속적으로 고도화 및 유지보수 중입니다.<br/><br />
+          </Typography>
           <Typography variant="h4" align="center" gutterBottom>
             Audio to MIDI AI
           </Typography>
           <Typography variant="body1" align="center" sx={{ mb: 4 }}>
-            반주 오디오 파일(wav)을 MIDI로 변환하여 다운로드하거나,<br />
+            반주 오디오 파일(wav)을 MIDI로 변환해서 다운로드하거나,<br />
             악보로 확인해 보세요.
           </Typography>
 
@@ -146,7 +157,7 @@ export default function BasicPitch() {
               {loading ? (
                 <>
                   <CircularProgress size={20} sx={{ mr: 1 }} />
-                  Converting...
+                  Converting... {estimatedTimeLeft !== null && `(${estimatedTimeLeft}s left)`}
                 </>
               ) : (
                 "Upload & Convert"
@@ -206,8 +217,7 @@ export default function BasicPitch() {
           This service uses <strong>Basic Pitch</strong> for audio-to-MIDI conversion.<br />
           Basic Pitch is an open-source audio-to-MIDI conversion tool developed by Spotify.<br />
           It is powered by Spotify’s neural pitch detection model via a Python implementation.<br />
-          The tool 'basic-pitch' is released under the MIT License.
-          <br /><br />
+          The tool 'basic-pitch' is released under the MIT License.<br /><br />
           Contact: taedyoverflow@gmail.com
         </Typography>
         <Copyright />

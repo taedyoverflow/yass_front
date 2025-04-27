@@ -66,7 +66,7 @@ function CustomAppBar() {
             <Button href="/separation" color="inherit">SEPARATION</Button>
             <Button href="/inference" color="inherit">INFERENCE</Button>
             <Button href="/train" color="inherit">TRAIN</Button> */}
-            <Button href="/" color="inherit">Spleeter/Demucs</Button>
+            <Button href="/" color="inherit">Spleeter / Demucs</Button>
             <Button href="/tts" color="inherit">edgeTTS</Button>
             <Button href="/pitch" color="inherit">BasicPitch</Button>
           </Box>
