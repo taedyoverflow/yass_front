@@ -51,7 +51,7 @@ export default function BasicPitch() {
           color="text.secondary"
           sx={{ fontSize: "0.875rem" }}
         >
-          This service uses GrooVAE for AI-powered drum beat generation.<br />
+          This service uses <strong>GrooVAE</strong> for AI-powered drum beat generation.<br />
           GrooVAE is an open-source model developed by Google's Magenta project.<br />
           Powered by a neural variational autoencoder architecture for realistic rhythm creation.<br />
           The tool 'GrooVAE' is released under the Apache 2.0 License.<br /><br />
