@@ -18,7 +18,7 @@ function Copyright() {
 
 export default function TTS() {
   const [text, setText] = useState('');
-  const [selectedVoice, setSelectedVoice] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState('');
   const [taskId, setTaskId] = useState(null);
   const [resultAudio, setResultAudio] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,11 +28,9 @@ export default function TTS() {
   const containsEnglish = (text) => /[a-zA-Z]/.test(text);
   const [textError, setTextError] = useState('');
 
-  const voiceOptions = [
-    { label: "한국어(남성)", value: "ko-KR-InJoonNeural" },
-    { label: "한국어(여성)", value: "ko-KR-SunHiNeural" },
-    { label: "영어(남성)", value: "en-US-AndrewNeural" },
-    { label: "영어(여성)", value: "en-US-AvaNeural" },
+  const languageOptions = [
+    { label: "한국어", value: "ko" },
+    { label: "영어", value: "en" },
   ];
 
   const checkResult = useCallback(async () => {
@@ -45,7 +43,7 @@ export default function TTS() {
       if (data.url) {
         setResultAudio(data.url);
         setPolling(false);
-        console.log("✅ TTS URL 직접 사용");
+        console.log("TTS URL 직접 사용");
       }
     } catch (err) {
       setError("TTS 결과 확인 실패");
@@ -69,8 +67,8 @@ export default function TTS() {
     setError('');
     setResultAudio('');
   
-    if (!text.trim() && !selectedVoice) {
-      alert("텍스트를 입력하고 언어와 성별을 정해주세요.");
+    if (!text.trim() && !selectedLanguage) {
+      alert("텍스트를 입력하고 언어를 선택해주세요.");
       return;
     }
   
@@ -79,8 +77,8 @@ export default function TTS() {
       return;
     }
   
-    if (!selectedVoice) {
-      alert("언어와 성별을 정해주세요.");
+    if (!selectedLanguage) {
+      alert("언어를 선택해주세요.");
       return;
     }
   
@@ -91,16 +89,16 @@ export default function TTS() {
     }
   
     // 언어 불일치 유효성 검사
-    const isKoreanVoice = selectedVoice.startsWith("ko-KR");
-    const isEnglishVoice = selectedVoice.startsWith("en-US");
+    const isKorean = selectedLanguage === "ko";
+    const isEnglish = selectedLanguage === "en";
   
-    if (isKoreanVoice && containsEnglish(text)) {
-      alert("선택한 음성이 한국어입니다. 텍스트에 영어가 포함되어 있으면 안 됩니다.");
+    if (isKorean && containsEnglish(text)) {
+      alert("선택한 언어가 한국어입니다. 텍스트에 영어가 포함되어 있으면 안 됩니다.");
       return;
     }
   
-    if (isEnglishVoice && containsKorean(text)) {
-      alert("선택한 음성이 영어입니다. 텍스트에 한글이 포함되어 있으면 안 됩니다.");
+    if (isEnglish && containsKorean(text)) {
+      alert("선택한 언어가 영어입니다. 텍스트에 한글이 포함되어 있으면 안 됩니다.");
       return;
     }
   
@@ -108,7 +106,7 @@ export default function TTS() {
   
     const formData = new URLSearchParams();
     formData.append('text', text);
-    formData.append('voice', selectedVoice);
+    formData.append('lang', selectedLanguage);
   
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/tts/`, {
@@ -166,18 +164,18 @@ export default function TTS() {
           </Box>
 
           <FormControl fullWidth sx={{ mt: 2, width: '100%', maxWidth: 400 }}>
-            <InputLabel>TTS Voice</InputLabel>
+            <InputLabel>Language</InputLabel>
             <Select
-              value={selectedVoice}
-              onChange={(e) => setSelectedVoice(e.target.value)}
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value)}
               displayEmpty
             >
-              {voiceOptions.map((opt, i) => (
+              {languageOptions.map((opt, i) => (
                 <MenuItem key={i} value={opt.value}>{opt.label}</MenuItem>
               ))}
             </Select>
             <Typography variant="body2" sx={{ mt: 1 }}>
-              언어와 성별을 정해주세요.
+              언어를 선택해주세요.
             </Typography>
           </FormControl>
 
@@ -226,10 +224,9 @@ export default function TTS() {
 
       <Box sx={{ bgcolor: "background.paper", p: 6 }} component="footer">
         <Typography variant="body2" align="center" color="text.secondary" sx={{ fontSize: "0.875rem" }}>
-          This service uses <strong>Edge TTS</strong> (unofficial) for text-to-speech synthesis.<br />
-          Edge TTS is an open-source text-to-speech synthesis tool developed by the community.<br />
-          It is powered by Microsoft Edge’s neural voices.<br />
-          The tool 'edge-tts' is released under the MIT License.<br /><br />
+          This service uses <strong>gTTS</strong> (Google Text-to-Speech) for text-to-speech synthesis.<br />
+          gTTS is a Python library that interfaces with Google Translate's text-to-speech API.<br />
+          The library 'gTTS' is released under the MIT License.<br /><br />
 
           Contact: taedyoverflow@gmail.com
         </Typography>

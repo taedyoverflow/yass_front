@@ -51,7 +51,7 @@ export default function BasicPitch() {
     setLoading(true);
     setEstimatedTimeLeft(300); // 300초
 
-    // ✅ 버튼 누르자마자 카운트다운 시작
+    // 버튼 누르자마자 카운트다운 시작
     clearInterval(intervalCountdownRef.current);
     intervalCountdownRef.current = setInterval(() => {
       setEstimatedTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
@@ -74,7 +74,7 @@ export default function BasicPitch() {
       const data = await res.json();
       setTaskId(data.task_id);
     } catch (err) {
-      console.error("❌ 업로드 실패:", err);
+      console.error("업로드 실패:", err);
       alert("Upload failed due to server error or network problem.");
       setLoading(false);
       setEstimatedTimeLeft(null);
@@ -106,7 +106,7 @@ export default function BasicPitch() {
       }
       
     } catch (err) {
-      console.error("❌ 결과 확인 실패:", err);
+      console.error("결과 확인 실패:", err);
       setLoading(false);
       setTaskId(null);
       setEstimatedTimeLeft(null);

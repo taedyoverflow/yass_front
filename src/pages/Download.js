@@ -9,7 +9,14 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Link from "@mui/material/Link";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
 import CustomAppBar from "../components/CustomAppbar";
+
+const ANNOUNCEMENT_STORAGE_KEY = "yass-service-notice-20260617";
 
 function Copyright() {
   return (
@@ -58,6 +65,15 @@ export default function Download() {
   const countdownRefDemucs = useRef(null);
   const countdownRefSpleeter = useRef(null);
 
+  const [announcementOpen, setAnnouncementOpen] = useState(
+    () => sessionStorage.getItem(ANNOUNCEMENT_STORAGE_KEY) !== "dismissed"
+  );
+
+  const handleCloseAnnouncement = () => {
+    sessionStorage.setItem(ANNOUNCEMENT_STORAGE_KEY, "dismissed");
+    setAnnouncementOpen(false);
+  };
+
   const checkResultDemucs = useCallback(async () => {
     if (!taskIdDemucs) return;
     try {
@@ -92,7 +108,7 @@ export default function Download() {
 
   useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); }, [page]);
 
-// 🎯 수정: useEffect에서 카운트다운 제거 (폴링만 유지)
+// 수정: useEffect에서 카운트다운 제거 (폴링만 유지)
 useEffect(() => {
   let intervalCheck = null;
   let retryCount = 0;
@@ -104,7 +120,7 @@ useEffect(() => {
         setSeparationLoadingSpleeter(false);
         alert("작업이 예상보다 오래 걸리고 있어요. 다시 시도해보거나 잠시 후 재시도해주세요.");
         clearInterval(intervalCheck);
-        clearInterval(countdownRefSpleeter.current); // 🔥 여기서 타이머도 같이 정리
+        clearInterval(countdownRefSpleeter.current); // 여기서 타이머도 같이 정리
         return;
       }
       checkResultSpleeter();
@@ -125,7 +141,7 @@ useEffect(() => {
         setSeparationLoadingDemucs(false);
         alert("작업이 예상보다 오래 걸리고 있어요. 다시 시도해보거나 잠시 후 재시도해주세요.");
         clearInterval(intervalCheck);
-        clearInterval(countdownRefDemucs.current); // 🔥 여기서 타이머도 같이 정리
+        clearInterval(countdownRefDemucs.current); // 여기서 타이머도 같이 정리
         return;
       }
       checkResultDemucs();
@@ -185,7 +201,7 @@ const processAudioDemucs = async () => {
   setBassBlobUrl("");
   setOtherBlobUrl("");
 
-  // ✅ 버튼 누르자마자 카운트다운 시작
+  // 버튼 누르자마자 카운트다운 시작
   clearInterval(countdownRefDemucs.current);
   countdownRefDemucs.current = setInterval(() => {
     setEstimatedTimeLeftDemucs(prev => (prev > 0 ? prev - 1 : 0));
@@ -216,7 +232,7 @@ const processAudioSpleeter = async () => {
   setVocalBlobUrlSpleeter("");
   setAccompBlobUrl("");
 
-  // ✅ 버튼 누르자마자 카운트다운 시작
+  // 버튼 누르자마자 카운트다운 시작
   clearInterval(countdownRefSpleeter.current);
   countdownRefSpleeter.current = setInterval(() => {
     setEstimatedTimeLeftSpleeter(prev => (prev > 0 ? prev - 1 : 0));
@@ -240,6 +256,30 @@ const processAudioSpleeter = async () => {
 
   return (
     <>
+      <Dialog open={announcementOpen} onClose={handleCloseAnnouncement} maxWidth="sm" fullWidth>
+        <DialogTitle>서비스 안내</DialogTitle>
+        <DialogContent>
+          <DialogContentText component="div">
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              2026년 6월 17일 오후 9시 기준, <strong>GrooVAE를 제외한</strong> 모든 메뉴와 기능을 정상적으로 이용하실 수 있습니다.
+            </Typography>
+            <Typography variant="body2" color="text.secondary" component="div" sx={{ mb: 1 }}>
+              이용 가능한 기능
+            </Typography>
+            <Box component="ul" sx={{ m: 0, pl: 2.5, mb: 2 }}>
+              <Typography component="li" variant="body2" color="text.secondary">Spleeter / Demucs (유튜브 음원 분리)</Typography>
+              <Typography component="li" variant="body2" color="text.secondary">BasicPitch (오디오 → MIDI 변환)</Typography>
+              <Typography component="li" variant="body2" color="text.secondary">gTTS (텍스트 음성 합성)</Typography>
+            </Box>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button variant="contained" onClick={handleCloseAnnouncement}>
+            확인
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <CustomAppBar />
   
       <main>
@@ -394,7 +434,7 @@ const processAudioSpleeter = async () => {
                 {/* Vocal */}
                 <Box sx={{ mt: 2 }}>
                   <Typography>Vocal</Typography>
-                  <audio controls preload="auto" src={vocalBlobUrlSpleeter}></audio> {/* ✅ 수정 */}
+                  <audio controls preload="auto" src={vocalBlobUrlSpleeter}></audio>
                   <Box sx={{ mt: 1, display: "flex", justifyContent: "center" }}>
                     <a href={vocalBlobUrlSpleeter} download="vocal.wav">
                       <Button variant="outlined" sx={{ mt: 1 }}>
@@ -435,10 +475,10 @@ const processAudioSpleeter = async () => {
                 ].map(([label, url]) => (
                   <Box key={label} sx={{ mt: 2 }}>
                     <Typography>{label}</Typography>
-                    <audio controls preload="auto" src={url}></audio> {/* ✅ width: "100%" 삭제 */}
+                    <audio controls preload="auto" src={url}></audio>
                     <Box sx={{ mt: 1, display: "flex", justifyContent: "center" }}>
                       <a href={url} download={`${label.toLowerCase()}.wav`}>
-                        <Button variant="outlined" sx={{ mt: 1 }}> {/* ✅ fullWidth 삭제 */}
+                        <Button variant="outlined" sx={{ mt: 1 }}>
                           Download {label}
                         </Button>
                       </a>

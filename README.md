@@ -15,7 +15,7 @@ YouTube Audio Separation, TTS, MIDI Conversion AI
   - Spleeter 기반 (보컬/반주 2트랙 분리)
   - Demucs 기반 (보컬/드럼/베이스/기타 4트랙 분리)
 - **Streaming & Download**: MinIO Public Bucket URL을 통해 직접 스트리밍/다운로드
-- **Text-to-Speech**: Edge-TTS 기반 자연스러운 음성 생성
+- **Text-to-Speech**: gTTS(Google Text-to-Speech) 기반 음성 생성 (한국어/영어)
 - **Audio to MIDI Conversion**: Basic Pitch 기반 오디오(MR) -> MIDI 변환 및 악보(PDF) 제공
 - **Async Processing**: Celery + Redis 기반 비동기 작업 처리
 - **Object Storage**: MinIO에 파일 저장 (일정 시간 후 자동 삭제)
@@ -36,7 +36,7 @@ flowchart TD
     A -->|Polling (5 sec)| B
 ```
 
-> 🎯 Separation과 TTS 결과는 **MinIO Public Bucket**에 저장되어 Presigned URL 없이도 접근 가능합니다.
+> Separation과 TTS 결과는 **MinIO Public Bucket**에 저장되어 Presigned URL 없이도 접근 가능합니다.
 
 
 ---
@@ -52,7 +52,7 @@ flowchart TD
     B -->|Response| A
 ```
 
-> 🎼 오디오 파일 업로드 후, Basic Pitch 모델로 MIDI 변환 → MuseScore로 PDF 악보 변환 → MinIO 저장 구조입니다.
+> 오디오 파일 업로드 후, Basic Pitch 모델로 MIDI 변환 → MuseScore로 PDF 악보 변환 → MinIO 저장 구조입니다.
 
 
 ---
@@ -70,7 +70,7 @@ flowchart TD
 - yt-dlp (YouTube 오디오 다운로드)
 - Spleeter (오디오 소스 분리)
 - Demucs (AI 기반 고급 오디오 소스 분리)
-- Edge-TTS (텍스트 음성 변환)
+- gTTS (Google Text-to-Speech, 텍스트 음성 변환)
 - Basic Pitch (오디오 -> MIDI 변환)
 - MuseScore (MIDI -> PDF 악보 변환)
 
@@ -79,7 +79,7 @@ flowchart TD
 - Docker (Frontend, Infrastructure 구성용)
 - Nginx + Certbot (HTTPS Reverse Proxy)
 
-> ⚡ FastAPI 서버는 현재 Docker 외부 `user1` 가상환경에서 구동 중입니다. (Chrome 세션 기반 yt-dlp 인증 유지 목적)
+> FastAPI 서버는 현재 Docker 외부 `user1` 가상환경에서 구동 중입니다. (Chrome 세션 기반 yt-dlp 인증 유지 목적)
 
 
 ---
@@ -116,6 +116,6 @@ flowchart TD
 
 ## Contact
 
-📧 Email: [taedyoverflow@gmail.com](mailto:taedyoverflow@gmail.com)
+Email: [taedyoverflow@gmail.com](mailto:taedyoverflow@gmail.com)
 
-🧠 Made by **Taedy**
+Made by **Taedy**

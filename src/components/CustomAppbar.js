@@ -31,11 +31,11 @@ function CustomAppBar() {
         <ListItem button component="a" href="/">
           <ListItemText primary="Spleeter / Demucs" />
         </ListItem>
-        <ListItem button component="a" href="/tts">
-          <ListItemText primary="edgeTTS" />
-        </ListItem>
         <ListItem button component="a" href="/pitch">
           <ListItemText primary="BasicPitch" />
+        </ListItem>
+        <ListItem button component="a" href="/tts">
+          <ListItemText primary="gTTS" />
         </ListItem>
         <ListItem button component="a" href="/djing">
           <ListItemText primary="GrooVAE" />
@@ -69,8 +69,8 @@ function CustomAppBar() {
             <Button href="/separation" color="inherit">SEPARATION</Button>
             <Button href="/inference" color="inherit">INFERENCE</Button>*/}
             <Button href="/" color="inherit">Spleeter / Demucs</Button>
-            <Button href="/tts" color="inherit">edgeTTS</Button>
             <Button href="/pitch" color="inherit">BasicPitch</Button>
+            <Button href="/tts" color="inherit">gTTS</Button>
             <Button href="/djing" color="inherit">GrooVAE</Button> 
           </Box>
         )}
