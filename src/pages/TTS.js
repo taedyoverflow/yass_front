@@ -106,7 +106,7 @@ export default function TTS() {
   
     const formData = new URLSearchParams();
     formData.append('text', text);
-    formData.append('lang', selectedLanguage);
+    formData.append('voice', selectedLanguage);
   
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/tts/`, {
