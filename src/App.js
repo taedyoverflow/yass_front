@@ -29,7 +29,7 @@ function App() {
           {/* <Route path="/" element={<Home />} /> */}
           {/* <Route path="/separation" element={<Separation />} /> */}
           <Route path="/djing" element={<DJing />} />
-          <Route path="/pitch" element={<BasicPitch />} /> */
+          <Route path="/pitch" element={<BasicPitch />} />
           <Route path="/tts" element={<TTS />} />
           <Route path="/" element={<Download />} />
         </Routes>
